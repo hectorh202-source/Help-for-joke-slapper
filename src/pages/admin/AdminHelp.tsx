@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useHelp } from "@/contexts/HelpContext";
+import { useAuthContext } from "@/contexts/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
-import { Plus, FileText, FolderOpen, Search, Eye, Settings, Lock, LogIn, LogOut } from "lucide-react";
+import { Plus, FileText, FolderOpen, Search, Eye, Settings, LogOut } from "lucide-react";
 import { HelpSection, HelpArticle } from "@/types/help";
 
 const AdminHelp = () => {
