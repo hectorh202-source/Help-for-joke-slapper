@@ -63,7 +63,7 @@ export function HelpSearch({ variant = "compact" }: HelpSearchProps) {
           onChange={(e) => { setQuery(e.target.value); setOpen(true); }}
           onFocus={() => setOpen(true)}
           placeholder="Search help articles..."
-          className={`w-full bg-background border border-border rounded-xl pl-11 pr-20 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all duration-200 ${
+          className={`w-full bg-background border border-border rounded-xl px-11 text-center focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all duration-200 ${
             isHero ? "h-14 text-base" : "h-10 text-sm"
           }`}
         />
@@ -73,9 +73,6 @@ export function HelpSearch({ variant = "compact" }: HelpSearchProps) {
               <X className="h-3.5 w-3.5 text-muted-foreground" />
             </button>
           )}
-          <kbd className="hidden sm:inline-flex h-5 items-center gap-0.5 rounded border bg-muted px-1.5 text-[10px] font-medium text-muted-foreground">
-            ⌘K
-          </kbd>
         </div>
       </div>
 
