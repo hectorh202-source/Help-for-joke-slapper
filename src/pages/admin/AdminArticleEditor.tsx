@@ -9,7 +9,7 @@ import { MarkdownRenderer } from "@/components/help/MarkdownRenderer";
 const AdminArticleEditor = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { articles, sections, setArticles, isAdmin } = useHelp();
+  const { articles, sections, setArticles } = useHelp();
   const isNew = id === "new";
 
   const existing = !isNew ? articles.find(a => a.id === id) : null;

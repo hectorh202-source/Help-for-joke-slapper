@@ -14,7 +14,7 @@ const ICON_OPTIONS = [
 const AdminSectionEditor = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { sections, setSections, isAdmin } = useHelp();
+  const { sections, setSections } = useHelp();
   const isNew = id === "new";
 
   const existing = !isNew ? sections.find(s => s.id === id) : null;
