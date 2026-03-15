@@ -1,33 +1,17 @@
 import { useState } from "react";
 import { useHelp } from "@/contexts/HelpContext";
+import { useAuthContext } from "@/contexts/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
-import { Plus, FileText, FolderOpen, Search, Eye, Settings, Lock, LogIn, LogOut } from "lucide-react";
+import { Plus, FileText, FolderOpen, Search, Eye, Settings, LogOut } from "lucide-react";
 import { HelpSection, HelpArticle } from "@/types/help";
 
 const AdminHelp = () => {
-  const { sections, articles, isAdmin, setIsAdmin, setSections, setArticles } = useHelp();
+  const { sections, articles, setSections, setArticles } = useHelp();
+  const { signOut } = useAuthContext();
   const navigate = useNavigate();
   const [tab, setTab] = useState<"articles" | "sections">("articles");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "published" | "draft">("all");
-
-  if (!isAdmin) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center max-w-sm">
-          <Lock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h1 className="text-2xl font-semibold text-foreground mb-2">Admin Access Required</h1>
-          <p className="text-muted-foreground mb-6">You need admin privileges to access the help center management.</p>
-          <button
-            onClick={() => setIsAdmin(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity"
-          >
-            <LogIn className="h-4 w-4" /> Sign in as Admin (Demo)
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   const filteredArticles = articles.filter(a => {
     const matchesSearch = a.title.toLowerCase().includes(search.toLowerCase());
@@ -101,7 +85,7 @@ const AdminHelp = () => {
             <Link to="/help" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
               <Eye className="h-4 w-4" /> View Help Center
             </Link>
-            <button onClick={() => setIsAdmin(false)} className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <button onClick={() => signOut()} className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
               <LogOut className="h-4 w-4" /> Sign out
             </button>
           </div>
