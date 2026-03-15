@@ -18,16 +18,18 @@ export function HelpLayout({ children, activeSlug, showSearch = true }: HelpLayo
     <div className="min-h-screen bg-background">
       {/* Top bar */}
       <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-sm border-b border-border">
-        <div className="max-w-[1440px] mx-auto px-6 h-14 flex items-center gap-4">
-          <button className="lg:hidden p-2 rounded-lg hover:bg-muted" onClick={() => setMobileNavOpen(!mobileNavOpen)}>
+        <div className="max-w-[1440px] mx-auto px-6 h-14 flex items-center gap-4 relative">
+          <button className="lg:hidden p-2 rounded-lg hover:bg-muted z-10" onClick={() => setMobileNavOpen(!mobileNavOpen)}>
             {mobileNavOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
-          <Link to="/help" className="text-base font-semibold text-foreground whitespace-nowrap">
+          <Link to="/help" className="text-base font-semibold text-foreground whitespace-nowrap z-10">
             Joke Slapper Help
           </Link>
           {showSearch && (
-            <div className="flex-1 max-w-md ml-auto">
-              <HelpSearch variant="compact" />
+            <div className="flex-1 flex justify-end lg:absolute lg:inset-0 lg:justify-center lg:items-center pointer-events-none">
+              <div className="w-full max-w-[200px] sm:max-w-md pointer-events-auto">
+                <HelpSearch variant="compact" />
+              </div>
             </div>
           )}
         </div>
