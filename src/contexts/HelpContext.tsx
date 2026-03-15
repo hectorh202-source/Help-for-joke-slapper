@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useCallback } from "react";
 import { HelpSection, HelpArticle, HelpArticleFeedback } from "@/types/help";
 import { initialSections, initialArticles } from "@/data/helpData";
-import { useAuthContext } from "@/contexts/AuthContext";
 
 interface HelpContextType {
   sections: HelpSection[];
@@ -17,6 +16,7 @@ interface HelpContextType {
   getSectionPath: (sectionId: string) => HelpSection[];
   searchArticles: (query: string) => HelpArticle[];
   isAdmin: boolean;
+  setIsAdmin: (v: boolean) => void;
 }
 
 const HelpContext = createContext<HelpContextType | null>(null);
@@ -25,7 +25,7 @@ export function HelpProvider({ children }: { children: React.ReactNode }) {
   const [sections, setSections] = useState<HelpSection[]>(initialSections);
   const [articles, setArticles] = useState<HelpArticle[]>(initialArticles);
   const [feedback, setFeedback] = useState<HelpArticleFeedback[]>([]);
-  const { isAdmin } = useAuthContext();
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const getSection = useCallback((slug: string) => sections.find(s => s.slug === slug), [sections]);
   const getArticle = useCallback((slug: string) => articles.find(a => a.slug === slug), [articles]);
@@ -65,7 +65,7 @@ export function HelpProvider({ children }: { children: React.ReactNode }) {
     <HelpContext.Provider value={{
       sections, articles, feedback, setSections, setArticles, addFeedback,
       getSection, getArticle, getChildSections, getArticlesForSection, getSectionPath, searchArticles,
-      isAdmin,
+      isAdmin, setIsAdmin,
     }}>
       {children}
     </HelpContext.Provider>
