@@ -30,7 +30,7 @@ const HelpArticlePage = () => {
   }
 
   const sectionPath = getSectionPath(article.sectionId);
-  const breadcrumbs = sectionPath.map(s => ({ label: s.title, href: `/help/${s.slug}` }));
+  const breadcrumbs: { label: string; href?: string }[] = sectionPath.map(s => ({ label: s.title, href: `/help/${s.slug}` }));
   breadcrumbs.push({ label: article.title });
 
   // Find prev/next

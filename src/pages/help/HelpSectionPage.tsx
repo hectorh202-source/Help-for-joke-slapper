@@ -28,7 +28,7 @@ const HelpSectionPage = () => {
   }
 
   const path = getSectionPath(section.id);
-  const breadcrumbs = path.slice(0, -1).map(s => ({ label: s.title, href: `/help/${s.slug}` }));
+  const breadcrumbs: { label: string; href?: string }[] = path.slice(0, -1).map(s => ({ label: s.title, href: `/help/${s.slug}` }));
   breadcrumbs.push({ label: section.title });
 
   const childSections = getChildSections(section.id);
