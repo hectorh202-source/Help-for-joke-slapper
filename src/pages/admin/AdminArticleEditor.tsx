@@ -31,10 +31,6 @@ const AdminArticleEditor = () => {
     }
   }, [title, isNew]);
 
-  if (!isAdmin) {
-    navigate("/admin/help");
-    return null;
-  }
 
   const handleSave = () => {
     if (!title.trim()) {

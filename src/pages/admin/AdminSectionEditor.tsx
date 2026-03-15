@@ -31,10 +31,6 @@ const AdminSectionEditor = () => {
     }
   }, [title, isNew]);
 
-  if (!isAdmin) {
-    navigate("/admin/help");
-    return null;
-  }
 
   const topSections = sections.filter(s => s.parentId === null && s.id !== id);
 
