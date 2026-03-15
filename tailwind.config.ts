@@ -57,6 +57,14 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        help: {
+          sidebar: "hsl(var(--help-sidebar-bg))",
+          "sidebar-active": "hsl(var(--help-sidebar-active))",
+          "sidebar-active-text": "hsl(var(--help-sidebar-active-text))",
+          "callout-info": "hsl(var(--help-callout-info))",
+          "callout-warning": "hsl(var(--help-callout-warning))",
+          "callout-tip": "hsl(var(--help-callout-tip))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
