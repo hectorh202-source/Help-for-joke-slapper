@@ -20,6 +20,27 @@ interface SidebarItemProps {
 function SidebarItem({ section, depth, activeSlug }: SidebarItemProps) {
   const { getChildSections, getArticlesForSection } = useHelp();
   const navigate = useNavigate();
+
+  if (section.slug === "introduction") {
+    const isIntroActive = activeSlug === "what-is-joke-slapper";
+    const Icon = getIcon(section.icon);
+    return (
+      <div className="mb-2">
+        <button
+          onClick={() => navigate("/help/article/what-is-joke-slapper")}
+          className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all duration-200 ${
+            isIntroActive
+              ? "bg-help-sidebar-active text-help-sidebar-active-text font-medium border-l-2 border-primary"
+              : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+          }`}
+        >
+          <Icon className="h-4 w-4 shrink-0" />
+          <span className="truncate flex-1 text-left">{section.title}</span>
+        </button>
+      </div>
+    );
+  }
+
   const children = getChildSections(section.id);
   const articles = getArticlesForSection(section.id);
   const hasChildren = children.length > 0 || articles.length > 0;

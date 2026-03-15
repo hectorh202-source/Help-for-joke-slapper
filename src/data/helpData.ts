@@ -3,6 +3,7 @@ import { HelpSection, HelpArticle } from "@/types/help";
 // ─── SECTIONS ────────────────────────────────────────────────
 export const initialSections: HelpSection[] = [
   // Top-level
+  { id: "introduction", title: "Introduction", slug: "introduction", icon: "BookOpen", parentId: null, sortOrder: -1, isPublished: true, createdAt: "2026-02-01T00:00:00Z", updatedAt: "2026-03-14T00:00:00Z" },
   { id: "getting-started", title: "Getting Started", slug: "getting-started", icon: "Rocket", parentId: null, sortOrder: 0, isPublished: true, createdAt: "2026-02-01T00:00:00Z", updatedAt: "2026-03-14T00:00:00Z" },
   { id: "writing-jokes", title: "Writing Jokes", slug: "writing-jokes", icon: "Pencil", parentId: null, sortOrder: 1, isPublished: true, createdAt: "2026-02-01T00:00:00Z", updatedAt: "2026-03-14T00:00:00Z" },
   { id: "the-builder", title: "The Builder", slug: "the-builder", icon: "Wrench", parentId: null, sortOrder: 2, isPublished: true, createdAt: "2026-02-01T00:00:00Z", updatedAt: "2026-03-14T00:00:00Z" },
@@ -21,7 +22,7 @@ export const initialArticles: HelpArticle[] = [
   {
     id: "gs-1", title: "What Is Joke Slapper?", slug: "what-is-joke-slapper",
     summary: "A quick overview of what Joke Slapper does and who it's for.",
-    sectionId: "getting-started", sortOrder: 0, isPublished: true, isFeatured: true, isPopular: true,
+    sectionId: "introduction", sortOrder: 0, isPublished: true, isFeatured: true, isPopular: true,
     createdAt: "2026-02-01T00:00:00Z", updatedAt: "2026-03-14T00:00:00Z",
     body: `## What Is Joke Slapper?
 

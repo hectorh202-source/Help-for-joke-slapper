@@ -23,7 +23,7 @@ const sectionDescriptions: Record<string, string> = {
 
 const HelpHome = () => {
   const { getChildSections, articles } = useHelp();
-  const topSections = getChildSections(null);
+  const topSections = getChildSections(null).filter(s => s.slug !== "introduction");
   const popularArticles = articles.filter(a => a.isPopular && a.isPublished).slice(0, 6);
   const gettingStartedArticles = articles.filter(a => a.sectionId === "getting-started" && a.isPublished).slice(0, 4);
   const troubleshootingArticles = articles.filter(a => a.sectionId === "troubleshooting" && a.isPublished).slice(0, 4);
