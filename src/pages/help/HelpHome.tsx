@@ -47,7 +47,7 @@ const HelpHome = () => {
       >
         <div className="max-w-[1440px] mx-auto px-6 text-center">
           <h1 className="text-4xl font-semibold tracking-tight text-foreground mb-3" style={{ letterSpacing: "-0.03em" }}>
-            How can we help you today?
+            Joke Slapper Help Center
           </h1>
           <p className="text-muted-foreground mb-8 text-lg max-w-xl mx-auto">
             Search our knowledge base or browse topics below to find answers quickly.
