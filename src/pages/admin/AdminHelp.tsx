@@ -85,7 +85,7 @@ const AdminHelp = () => {
             <Link to="/help" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
               <Eye className="h-4 w-4" /> View Help Center
             </Link>
-            <button onClick={() => setIsAdmin(false)} className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <button onClick={() => signOut()} className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
               <LogOut className="h-4 w-4" /> Sign out
             </button>
           </div>
