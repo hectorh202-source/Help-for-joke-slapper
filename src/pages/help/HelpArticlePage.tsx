@@ -34,10 +34,25 @@ const HelpArticlePage = () => {
   breadcrumbs.push({ label: article.title });
 
   // Find prev/next
-  const sameSection = articles.filter(a => a.sectionId === article.sectionId && a.isPublished).sort((a, b) => a.sortOrder - b.sortOrder);
-  const currentIdx = sameSection.findIndex(a => a.id === article.id);
-  const prev = currentIdx > 0 ? sameSection[currentIdx - 1] : null;
-  const next = currentIdx < sameSection.length - 1 ? sameSection[currentIdx + 1] : null;
+  let prev: typeof article | null = null;
+  let next: typeof article | null = null;
+
+  if (article.slug === "what-is-joke-slapper") {
+    // Special case for the intro article, next is the first getting-started article
+    next = articles.find(a => a.sectionId === "getting-started" && a.sortOrder === 1 && a.isPublished) || null;
+  } else {
+    const sameSection = articles.filter(a => a.sectionId === article.sectionId && a.isPublished).sort((a, b) => a.sortOrder - b.sortOrder);
+    const currentIdx = sameSection.findIndex(a => a.id === article.id);
+    
+    // Special case for the first article in getting-started to link back to the intro
+    if (article.sectionId === "getting-started" && currentIdx === 0) {
+      prev = articles.find(a => a.slug === "what-is-joke-slapper") || null;
+    } else {
+      prev = currentIdx > 0 ? sameSection[currentIdx - 1] : null;
+    }
+    
+    next = currentIdx < sameSection.length - 1 ? sameSection[currentIdx + 1] : null;
+  }
 
   return (
     <HelpLayout activeSlug={article.slug}>
