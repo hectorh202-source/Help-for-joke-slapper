@@ -23,7 +23,7 @@ export function HelpLayout({ children, activeSlug, showSearch = true }: HelpLayo
             {mobileNavOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
           <Link to="/help" className="text-base font-semibold text-foreground whitespace-nowrap">
-            Help Center
+            Joke Slapper Help
           </Link>
           {showSearch && (
             <div className="flex-1 max-w-md ml-auto">

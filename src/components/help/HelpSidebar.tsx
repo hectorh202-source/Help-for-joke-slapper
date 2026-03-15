@@ -93,7 +93,7 @@ export function HelpSidebar({ activeSlug }: { activeSlug?: string }) {
           onClick={() => window.location.href = "/help"}
           className="text-lg font-semibold text-foreground tracking-tight"
         >
-          Help Center
+          Joke Slapper Help
         </button>
       </div>
       <div className="space-y-0.5">
