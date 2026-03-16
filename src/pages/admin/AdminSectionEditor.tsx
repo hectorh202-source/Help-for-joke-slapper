@@ -72,14 +72,14 @@ const AdminSectionEditor = () => {
     );
     if (!current || !swap) return;
 
-    const { error } = await supabase.from("help_articles").upsert([
-      { id: current.id, sort_order: current.sortOrder },
-      { id: swap.id, sort_order: swap.sortOrder },
+    const [res1, res2] = await Promise.all([
+      supabase.from("help_articles").update({ sort_order: current.sortOrder }).eq("id", current.id),
+      supabase.from("help_articles").update({ sort_order: swap.sortOrder }).eq("id", swap.id),
     ]);
 
-    if (error) {
+    if (res1.error || res2.error) {
       // eslint-disable-next-line no-console
-      console.error("Error updating sort order", error);
+      console.error("Error updating article sort order", res1.error || res2.error);
     }
   };
 
