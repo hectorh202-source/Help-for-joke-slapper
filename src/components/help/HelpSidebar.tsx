@@ -1,6 +1,6 @@
 import { useHelp } from "@/contexts/HelpContext";
 import { useNavigate, useLocation, Link } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChevronRight } from "lucide-react";
 import { HelpSection } from "@/types/help";
 import { motion, AnimatePresence } from "framer-motion";
@@ -49,6 +49,12 @@ function SidebarItem({ section, depth, activeSlug }: SidebarItemProps) {
   const isArticleActive = articles.some(a => a.slug === activeSlug);
   const isChildActive = children.some(c => c.slug === activeSlug) || isArticleActive;
   const [expanded, setExpanded] = useState(isActive || isChildActive);
+
+  useEffect(() => {
+    if (isActive || isChildActive) {
+      setExpanded(true);
+    }
+  }, [activeSlug, isActive, isChildActive]);
 
   const Icon = getIcon(section.icon);
 
