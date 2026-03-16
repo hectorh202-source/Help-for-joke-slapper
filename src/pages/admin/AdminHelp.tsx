@@ -258,6 +258,49 @@ const AdminHelp = () => {
     }
   };
 
+  const moveSection = async (id: string, direction: "up" | "down") => {
+    let updated: HelpSection[] | null = null;
+
+    setSections(prev => {
+      const section = prev.find(s => s.id === id);
+      if (!section) return prev;
+      const siblings = prev
+        .filter(s => s.parentId === section.parentId)
+        .sort((a, b) => a.sortOrder - b.sortOrder);
+      const idx = siblings.findIndex(s => s.id === id);
+      if ((direction === "up" && idx === 0) || (direction === "down" && idx === siblings.length - 1)) return prev;
+      const swapIdx = direction === "up" ? idx - 1 : idx + 1;
+      const swapSection = siblings[swapIdx];
+      const next = prev.map(s => {
+        if (s.id === id) return { ...s, sortOrder: swapSection.sortOrder };
+        if (s.id === swapSection.id) return { ...s, sortOrder: section.sortOrder };
+        return s;
+      });
+      updated = next;
+      return next;
+    });
+
+    if (!updated) return;
+    const current = updated.find(s => s.id === id);
+    const swap = updated.find(
+      s =>
+        s.parentId === current?.parentId &&
+        s.id !== current.id &&
+        s.sortOrder === (direction === "up" ? (current?.sortOrder ?? 0) + 1 : (current?.sortOrder ?? 0) - 1),
+    );
+    if (!current || !swap) return;
+
+    const { error } = await supabase.from("help_sections").upsert([
+      { id: current.id, sort_order: current.sortOrder },
+      { id: swap.id, sort_order: swap.sortOrder },
+    ]);
+
+    if (error) {
+      // eslint-disable-next-line no-console
+      console.error("Error updating sort order", error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-sm border-b border-border">
@@ -407,6 +450,8 @@ const AdminHelp = () => {
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-1">
+                        <button onClick={() => moveSection(section.id, "up")} className="p-1.5 rounded hover:bg-muted text-muted-foreground" title="Move up">↑</button>
+                        <button onClick={() => moveSection(section.id, "down")} className="p-1.5 rounded hover:bg-muted text-muted-foreground" title="Move down">↓</button>
                         <button onClick={() => navigate(`/admin/help/section/${section.id}`)} className="p-1.5 rounded hover:bg-muted text-muted-foreground text-xs">Edit</button>
                         <button onClick={() => toggleSectionPublish(section)} className="p-1.5 rounded hover:bg-muted text-muted-foreground text-xs">
                           {section.isPublished ? "Unpublish" : "Publish"}

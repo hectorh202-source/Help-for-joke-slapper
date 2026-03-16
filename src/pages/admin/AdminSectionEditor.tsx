@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useHelp } from "@/contexts/HelpContext";
-import { HelpSection } from "@/types/help";
-import { ArrowLeft, Save } from "lucide-react";
+import { HelpSection, HelpArticle } from "@/types/help";
+import { ArrowLeft, Save, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabaseClient";
 
@@ -15,7 +15,7 @@ const ICON_OPTIONS = [
 const AdminSectionEditor = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { sections, setSections, isAdmin } = useHelp();
+  const { sections, setSections, articles, setArticles, isAdmin } = useHelp();
   const isNew = id === "new";
 
   const existing = !isNew ? sections.find(s => s.id === id) : null;
@@ -38,6 +38,50 @@ const AdminSectionEditor = () => {
   }
 
   const topSections = sections.filter(s => s.parentId === null && s.id !== id);
+  const sectionArticles = articles.filter(a => a.sectionId === id).sort((a, b) => a.sortOrder - b.sortOrder);
+
+  const moveArticle = async (articleId: string, direction: "up" | "down") => {
+    let updated: HelpArticle[] | null = null;
+
+    setArticles(prev => {
+      const article = prev.find(a => a.id === articleId);
+      if (!article) return prev;
+      const siblings = prev
+        .filter(a => a.sectionId === article.sectionId)
+        .sort((a, b) => a.sortOrder - b.sortOrder);
+      const idx = siblings.findIndex(a => a.id === articleId);
+      if ((direction === "up" && idx === 0) || (direction === "down" && idx === siblings.length - 1)) return prev;
+      const swapIdx = direction === "up" ? idx - 1 : idx + 1;
+      const swapArticle = siblings[swapIdx];
+      const next = prev.map(a => {
+        if (a.id === articleId) return { ...a, sortOrder: swapArticle.sortOrder };
+        if (a.id === swapArticle.id) return { ...a, sortOrder: article.sortOrder };
+        return a;
+      });
+      updated = next;
+      return next;
+    });
+
+    if (!updated) return;
+    const current = updated.find(a => a.id === articleId);
+    const swap = updated.find(
+      a =>
+        a.sectionId === current?.sectionId &&
+        a.id !== current.id &&
+        a.sortOrder === (direction === "up" ? (current?.sortOrder ?? 0) + 1 : (current?.sortOrder ?? 0) - 1),
+    );
+    if (!current || !swap) return;
+
+    const { error } = await supabase.from("help_articles").upsert([
+      { id: current.id, sort_order: current.sortOrder },
+      { id: swap.id, sort_order: swap.sortOrder },
+    ]);
+
+    if (error) {
+      // eslint-disable-next-line no-console
+      console.error("Error updating sort order", error);
+    }
+  };
 
   const handleSave = async () => {
     if (!title.trim()) {
@@ -175,6 +219,46 @@ const AdminSectionEditor = () => {
           <input type="checkbox" checked={isPublished} onChange={e => setIsPublished(e.target.checked)} className="rounded" />
           Published
         </label>
+        
+        {!isNew && (
+          <div className="pt-8 mt-8 border-t border-border">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-foreground">Articles in this Section</h2>
+              <button 
+                onClick={() => navigate("/admin/help/article/new")} 
+                className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline hover:text-primary/80 transition-colors"
+              >
+                <Plus className="h-4 w-4" /> Add Article
+              </button>
+            </div>
+            {sectionArticles.length > 0 ? (
+              <div className="border border-border rounded-xl overflow-hidden divide-y divide-border">
+                {sectionArticles.map(article => (
+                  <div key={article.id} className="flex items-center justify-between p-4 bg-background hover:bg-muted/30 transition-colors">
+                    <div>
+                      <div className="font-medium text-sm text-foreground flex items-center gap-2">
+                        {article.title}
+                        {!article.isPublished && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-100 text-amber-700">Draft</span>
+                        )}
+                      </div>
+                      <div className="text-xs text-muted-foreground">/{article.slug}</div>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <button onClick={() => moveArticle(article.id, "up")} className="p-1.5 rounded hover:bg-muted text-muted-foreground" title="Move up">↑</button>
+                      <button onClick={() => moveArticle(article.id, "down")} className="p-1.5 rounded hover:bg-muted text-muted-foreground" title="Move down">↓</button>
+                      <button onClick={() => navigate(`/admin/help/article/${article.id}`)} className="p-1.5 rounded hover:bg-muted text-muted-foreground text-xs font-medium">Edit</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-sm text-muted-foreground px-4 py-8 text-center border border-border border-dashed rounded-xl">
+                No articles in this section yet.
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
