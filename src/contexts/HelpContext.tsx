@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
 import { HelpSection, HelpArticle, HelpArticleFeedback } from "@/types/help";
-import { initialSections, initialArticles } from "@/data/helpData";
 import { supabase } from "@/lib/supabaseClient";
 
 interface HelpContextType {
@@ -18,17 +17,17 @@ interface HelpContextType {
   searchArticles: (query: string) => HelpArticle[];
   isAdmin: boolean;
   setIsAdmin: (v: boolean) => void;
+  isLoading: boolean;
 }
 
 const HelpContext = createContext<HelpContextType | null>(null);
 
 export function HelpProvider({ children }: { children: React.ReactNode }) {
-  // Seed from hardcoded data so the site is never blank,
-  // then hydrate/override from Supabase when available.
-  const [sections, setSections] = useState<HelpSection[]>(initialSections);
-  const [articles, setArticles] = useState<HelpArticle[]>(initialArticles);
+  const [sections, setSections] = useState<HelpSection[]>([]);
+  const [articles, setArticles] = useState<HelpArticle[]>([]);
   const [feedback, setFeedback] = useState<HelpArticleFeedback[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     let isMounted = true;
@@ -124,9 +123,10 @@ export function HelpProvider({ children }: { children: React.ReactNode }) {
       if (error) {
         // eslint-disable-next-line no-console
         console.error("Error getting Supabase session", error);
-        return;
+      } else {
+        setIsAdmin(!!data.session?.user);
       }
-      setIsAdmin(!!data.session?.user);
+      setIsLoading(false);
     };
 
     void initAuthAndData();
@@ -190,7 +190,7 @@ export function HelpProvider({ children }: { children: React.ReactNode }) {
     <HelpContext.Provider value={{
       sections, articles, feedback, setSections, setArticles, addFeedback,
       getSection, getArticle, getChildSections, getArticlesForSection, getSectionPath, searchArticles,
-      isAdmin, setIsAdmin,
+      isAdmin, setIsAdmin, isLoading,
     }}>
       {children}
     </HelpContext.Provider>

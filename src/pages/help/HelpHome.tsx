@@ -3,7 +3,7 @@ import { useHelp } from "@/contexts/HelpContext";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import * as Icons from "lucide-react";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
 
 function getIcon(name: string) {
   const Icon = (Icons as unknown as Record<string, React.ComponentType<{ className?: string }>>)[name];
@@ -22,7 +22,17 @@ const sectionDescriptions: Record<string, string> = {
 };
 
 const HelpHome = () => {
-  const { getChildSections, articles, sections } = useHelp();
+  const { getChildSections, articles, sections, isLoading } = useHelp();
+  
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center">
+        <Loader2 className="h-8 w-8 text-primary animate-spin mb-4" />
+        <p className="text-muted-foreground font-medium animate-pulse">Loading help center...</p>
+      </div>
+    );
+  }
+
   const topSections = getChildSections(null).filter(s => s.slug !== "introduction");
   const popularArticles = articles.filter(a => a.isPopular && a.isPublished).slice(0, 6);
   const gettingStartedSection = sections.find(s => s.slug === "getting-started");
