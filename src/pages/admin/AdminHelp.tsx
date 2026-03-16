@@ -142,9 +142,17 @@ const AdminHelp = () => {
     const matchesSearch = a.title.toLowerCase().includes(search.toLowerCase());
     const matchesStatus = statusFilter === "all" || (statusFilter === "published" ? a.isPublished : !a.isPublished);
     return matchesSearch && matchesStatus;
+  }).sort((a, b) => {
+    if (a.sectionId === b.sectionId) return a.sortOrder - b.sortOrder;
+    return a.sectionId.localeCompare(b.sectionId);
   });
 
-  const filteredSections = sections.filter(s => s.title.toLowerCase().includes(search.toLowerCase()));
+  const filteredSections = sections
+    .filter(s => s.title.toLowerCase().includes(search.toLowerCase()))
+    .sort((a, b) => {
+      if (a.parentId === b.parentId) return a.sortOrder - b.sortOrder;
+      return (a.parentId || "").localeCompare(b.parentId || "");
+    });
 
   const getParentTitle = (parentId: string | null) => {
     if (!parentId) return "—";
