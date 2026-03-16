@@ -1,5 +1,5 @@
 import { useHelp } from "@/contexts/HelpContext";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useState } from "react";
 import { ChevronRight } from "lucide-react";
 import { HelpSection } from "@/types/help";
@@ -109,20 +109,27 @@ export function HelpSidebar({ activeSlug }: { activeSlug?: string }) {
   const topSections = getChildSections(null);
 
   return (
-    <nav className="w-[280px] shrink-0 sticky top-0 h-screen overflow-y-auto bg-help-sidebar border-r border-border p-4 hidden lg:block">
-      <div className="mb-4 space-y-4">
-        <button
-          onClick={() => window.location.href = "/help"}
-          className="text-lg font-semibold text-foreground tracking-tight"
-        >
-          Joke Slapper Help
-        </button>
-        <HelpSearch variant="compact" />
+    <nav className="w-[280px] shrink-0 sticky top-0 h-screen overflow-y-auto bg-help-sidebar border-r border-border flex flex-col lg:flex hidden lg:block">
+      <div className="p-4 flex-1">
+        <div className="mb-4 space-y-4">
+          <button
+            onClick={() => window.location.href = "/help"}
+            className="text-lg font-semibold text-foreground tracking-tight"
+          >
+            Joke Slapper Help
+          </button>
+          <HelpSearch variant="compact" />
+        </div>
+        <div className="space-y-0.5">
+          {topSections.map(section => (
+            <SidebarItem key={section.id} section={section} depth={0} activeSlug={activeSlug} />
+          ))}
+        </div>
       </div>
-      <div className="space-y-0.5">
-        {topSections.map(section => (
-          <SidebarItem key={section.id} section={section} depth={0} activeSlug={activeSlug} />
-        ))}
+      <div className="p-4 border-t border-border mt-auto">
+        <Link to="/admin/help" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+          Admin Dashboard
+        </Link>
       </div>
     </nav>
   );
