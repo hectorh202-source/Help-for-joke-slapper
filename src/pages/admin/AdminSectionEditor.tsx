@@ -61,7 +61,17 @@ const AdminSectionEditor = () => {
 
       setSections(prev => [...prev, newSection]);
 
-      const { error } = await supabase.from("help_sections").insert(newSection);
+      const { error } = await supabase.from("help_sections").insert({
+        id: newSection.id,
+        title: newSection.title,
+        slug: newSection.slug,
+        icon: newSection.icon,
+        parent_id: newSection.parentId,
+        sort_order: newSection.sortOrder,
+        is_published: newSection.isPublished,
+        created_at: newSection.createdAt,
+        updated_at: newSection.updatedAt,
+      });
       if (error) {
         // eslint-disable-next-line no-console
         console.error("Error creating section", error);
@@ -87,9 +97,9 @@ const AdminSectionEditor = () => {
           title,
           slug,
           icon,
-          parentId,
-          isPublished,
-          updatedAt: now,
+          parent_id: parentId,
+          is_published: isPublished,
+          updated_at: now,
         })
         .eq("id", id!);
 

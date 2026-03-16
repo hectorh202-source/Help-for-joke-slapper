@@ -41,9 +41,9 @@ export function HelpProvider({ children }: { children: React.ReactNode }) {
           { data: articleRows, error: articleError },
           { data: feedbackRows, error: feedbackError },
         ] = await Promise.all([
-          supabase.from("help_sections").select("*"),
-          supabase.from("help_articles").select("*"),
-          supabase.from("help_article_feedback").select("*"),
+          supabase.from("help_sections").select("*").order("sort_order", { ascending: true }),
+          supabase.from("help_articles").select("*").order("sort_order", { ascending: true }),
+          supabase.from("help_article_feedback").select("*").order("created_at", { ascending: true }),
         ]);
 
         if (!isMounted) return;
@@ -52,9 +52,51 @@ export function HelpProvider({ children }: { children: React.ReactNode }) {
           // eslint-disable-next-line no-console
           console.error("Error loading help content", { sectionError, articleError, feedbackError });
         } else {
-          if (sectionRows) setSections(sectionRows as HelpSection[]);
-          if (articleRows) setArticles(articleRows as HelpArticle[]);
-          if (feedbackRows) setFeedback(feedbackRows as HelpArticleFeedback[]);
+          if (sectionRows) {
+            setSections(
+              sectionRows.map((row: any): HelpSection => ({
+                id: row.id,
+                title: row.title,
+                slug: row.slug,
+                icon: row.icon,
+                parentId: row.parent_id,
+                sortOrder: row.sort_order,
+                isPublished: row.is_published,
+                createdAt: row.created_at,
+                updatedAt: row.updated_at,
+              })),
+            );
+          }
+
+          if (articleRows) {
+            setArticles(
+              articleRows.map((row: any): HelpArticle => ({
+                id: row.id,
+                title: row.title,
+                slug: row.slug,
+                summary: row.summary,
+                body: row.body,
+                sectionId: row.section_id,
+                sortOrder: row.sort_order,
+                isPublished: row.is_published,
+                isFeatured: row.is_featured,
+                isPopular: row.is_popular,
+                createdAt: row.created_at,
+                updatedAt: row.updated_at,
+              })),
+            );
+          }
+
+          if (feedbackRows) {
+            setFeedback(
+              feedbackRows.map((row: any): HelpArticleFeedback => ({
+                id: row.id,
+                articleId: row.article_id,
+                wasHelpful: row.was_helpful,
+                createdAt: row.created_at,
+              })),
+            );
+          }
         }
       } catch (e) {
         // eslint-disable-next-line no-console

@@ -161,7 +161,7 @@ const AdminHelp = () => {
 
     const { error } = await supabase
       .from("help_articles")
-      .update({ isPublished: nextPublished, updatedAt: new Date().toISOString() })
+      .update({ is_published: nextPublished, updated_at: new Date().toISOString() })
       .eq("id", article.id);
 
     if (error) {
@@ -176,7 +176,7 @@ const AdminHelp = () => {
 
     const { error } = await supabase
       .from("help_sections")
-      .update({ isPublished: nextPublished, updatedAt: new Date().toISOString() })
+      .update({ is_published: nextPublished, updated_at: new Date().toISOString() })
       .eq("id", section.id);
 
     if (error) {
@@ -247,12 +247,10 @@ const AdminHelp = () => {
     );
     if (!current || !swap) return;
 
-    const { error } = await supabase
-      .from("help_articles")
-      .upsert([
-        { id: current.id, sortOrder: current.sortOrder },
-        { id: swap.id, sortOrder: swap.sortOrder },
-      ]);
+    const { error } = await supabase.from("help_articles").upsert([
+      { id: current.id, sort_order: current.sortOrder },
+      { id: swap.id, sort_order: swap.sortOrder },
+    ]);
 
     if (error) {
       // eslint-disable-next-line no-console

@@ -67,7 +67,20 @@ const AdminArticleEditor = () => {
 
       setArticles(prev => [...prev, newArticle]);
 
-      const { error } = await supabase.from("help_articles").insert(newArticle);
+      const { error } = await supabase.from("help_articles").insert({
+        id: newArticle.id,
+        title: newArticle.title,
+        slug: newArticle.slug,
+        summary: newArticle.summary,
+        body: newArticle.body,
+        section_id: newArticle.sectionId,
+        sort_order: newArticle.sortOrder,
+        is_published: newArticle.isPublished,
+        is_featured: newArticle.isFeatured,
+        is_popular: newArticle.isPopular,
+        created_at: newArticle.createdAt,
+        updated_at: newArticle.updatedAt,
+      });
       if (error) {
         // eslint-disable-next-line no-console
         console.error("Error creating article", error);
@@ -97,11 +110,11 @@ const AdminArticleEditor = () => {
           slug,
           summary,
           body,
-          sectionId,
-          isPublished,
-          isFeatured,
-          isPopular,
-          updatedAt: now,
+          section_id: sectionId,
+          is_published: isPublished,
+          is_featured: isFeatured,
+          is_popular: isPopular,
+          updated_at: now,
         })
         .eq("id", id!);
 
