@@ -413,7 +413,6 @@ const AdminHelp = () => {
                             </button>
                             <div>
                               <div className="font-medium text-foreground">{section.title}</div>
-                              <div className="text-xs text-muted-foreground">/{section.slug}</div>
                             </div>
                           </div>
                         </td>
@@ -461,7 +460,6 @@ const AdminHelp = () => {
                                             <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-100 text-amber-700">Draft</span>
                                           )}
                                         </div>
-                                        <div className="text-xs text-muted-foreground">/{article.slug}</div>
                                       </div>
                                       <div className="flex items-center gap-1">
                                         <button onClick={() => moveArticle(article.id, "up")} className="p-1.5 rounded hover:bg-muted text-muted-foreground" title="Move up">↑</button>
@@ -507,7 +505,6 @@ const AdminHelp = () => {
                   <tr key={article.id} className="hover:bg-muted/30 transition-colors">
                     <td className="px-4 py-3">
                       <div className="font-medium text-foreground">{article.title}</div>
-                      <div className="text-xs text-muted-foreground">/{article.slug}</div>
                     </td>
                     <td className="px-4 py-3 text-muted-foreground">{getSectionTitle(article.sectionId)}</td>
                     <td className="px-4 py-3">

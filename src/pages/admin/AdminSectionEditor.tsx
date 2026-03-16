@@ -242,7 +242,6 @@ const AdminSectionEditor = () => {
                           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-100 text-amber-700">Draft</span>
                         )}
                       </div>
-                      <div className="text-xs text-muted-foreground">/{article.slug}</div>
                     </div>
                     <div className="flex items-center gap-1">
                       <button onClick={() => moveArticle(article.id, "up")} className="p-1.5 rounded hover:bg-muted text-muted-foreground" title="Move up">↑</button>
