@@ -155,47 +155,109 @@ const AdminHelp = () => {
     return sections.find(s => s.id === sectionId)?.title || "Unknown";
   };
 
-  const togglePublish = (article: HelpArticle) => {
-    setArticles(prev => prev.map(a => a.id === article.id ? { ...a, isPublished: !a.isPublished } : a));
-  };
+  const togglePublish = async (article: HelpArticle) => {
+    const nextPublished = !article.isPublished;
+    setArticles(prev => prev.map(a => a.id === article.id ? { ...a, isPublished: nextPublished } : a));
 
-  const toggleSectionPublish = (section: HelpSection) => {
-    setSections(prev => prev.map(s => s.id === section.id ? { ...s, isPublished: !s.isPublished } : s));
-  };
+    const { error } = await supabase
+      .from("help_articles")
+      .update({ isPublished: nextPublished, updatedAt: new Date().toISOString() })
+      .eq("id", article.id);
 
-  const deleteArticle = (id: string) => {
-    if (confirm("Are you sure you want to delete this article?")) {
-      setArticles(prev => prev.filter(a => a.id !== id));
+    if (error) {
+      // eslint-disable-next-line no-console
+      console.error("Error toggling article publish status", error);
     }
   };
 
-  const deleteSection = (id: string) => {
+  const toggleSectionPublish = async (section: HelpSection) => {
+    const nextPublished = !section.isPublished;
+    setSections(prev => prev.map(s => s.id === section.id ? { ...s, isPublished: nextPublished } : s));
+
+    const { error } = await supabase
+      .from("help_sections")
+      .update({ isPublished: nextPublished, updatedAt: new Date().toISOString() })
+      .eq("id", section.id);
+
+    if (error) {
+      // eslint-disable-next-line no-console
+      console.error("Error toggling section publish status", error);
+    }
+  };
+
+  const deleteArticle = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this article?")) return;
+
+    setArticles(prev => prev.filter(a => a.id !== id));
+
+    const { error } = await supabase.from("help_articles").delete().eq("id", id);
+    if (error) {
+      // eslint-disable-next-line no-console
+      console.error("Error deleting article", error);
+    }
+  };
+
+  const deleteSection = async (id: string) => {
     const hasChildren = sections.some(s => s.parentId === id);
     const hasArticles = articles.some(a => a.sectionId === id);
     if (hasChildren || hasArticles) {
       alert("Cannot delete a section that has subsections or articles. Remove them first.");
       return;
     }
-    if (confirm("Are you sure you want to delete this section?")) {
-      setSections(prev => prev.filter(s => s.id !== id));
+    if (!confirm("Are you sure you want to delete this section?")) return;
+
+    setSections(prev => prev.filter(s => s.id !== id));
+
+    const { error } = await supabase.from("help_sections").delete().eq("id", id);
+    if (error) {
+      // eslint-disable-next-line no-console
+      console.error("Error deleting section", error);
     }
   };
 
-  const moveArticle = (id: string, direction: "up" | "down") => {
+  const moveArticle = async (id: string, direction: "up" | "down") => {
+    let updated: HelpArticle[] | null = null;
+
     setArticles(prev => {
       const article = prev.find(a => a.id === id);
       if (!article) return prev;
-      const siblings = prev.filter(a => a.sectionId === article.sectionId).sort((a, b) => a.sortOrder - b.sortOrder);
+      const siblings = prev
+        .filter(a => a.sectionId === article.sectionId)
+        .sort((a, b) => a.sortOrder - b.sortOrder);
       const idx = siblings.findIndex(a => a.id === id);
       if ((direction === "up" && idx === 0) || (direction === "down" && idx === siblings.length - 1)) return prev;
       const swapIdx = direction === "up" ? idx - 1 : idx + 1;
       const swapArticle = siblings[swapIdx];
-      return prev.map(a => {
+      const next = prev.map(a => {
         if (a.id === id) return { ...a, sortOrder: swapArticle.sortOrder };
         if (a.id === swapArticle.id) return { ...a, sortOrder: article.sortOrder };
         return a;
       });
+      updated = next;
+      return next;
     });
+
+    if (!updated) return;
+    const current = updated.find(a => a.id === id);
+    const swap = updated.find(
+      a =>
+        a.sectionId === current?.sectionId &&
+        a.id !== current.id &&
+        a.sortOrder === (direction === "up" ? (current?.sortOrder ?? 0) + 1 : (current?.sortOrder ?? 0) - 1),
+    );
+    if (!current || !swap) return;
+
+    const { error } = await supabase
+      .from("help_articles")
+      .upsert([
+        { id: current.id, sortOrder: current.sortOrder },
+        { id: swap.id, sortOrder: swap.sortOrder },
+      ]);
+
+    if (error) {
+      // eslint-disable-next-line no-console
+      console.error("Error updating sort order", error);
+    }
   };
 
   return (

@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
 import { HelpSection, HelpArticle, HelpArticleFeedback } from "@/types/help";
-import { initialSections, initialArticles } from "@/data/helpData";
 import { supabase } from "@/lib/supabaseClient";
 
 interface HelpContextType {
@@ -23,15 +22,37 @@ interface HelpContextType {
 const HelpContext = createContext<HelpContextType | null>(null);
 
 export function HelpProvider({ children }: { children: React.ReactNode }) {
-  const [sections, setSections] = useState<HelpSection[]>(initialSections);
-  const [articles, setArticles] = useState<HelpArticle[]>(initialArticles);
+  const [sections, setSections] = useState<HelpSection[]>([]);
+  const [articles, setArticles] = useState<HelpArticle[]>([]);
   const [feedback, setFeedback] = useState<HelpArticleFeedback[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
 
-    const initAuth = async () => {
+    const initAuthAndData = async () => {
+      // Load help content from Supabase
+      const [
+        { data: sectionRows, error: sectionError },
+        { data: articleRows, error: articleError },
+        { data: feedbackRows, error: feedbackError },
+      ] = await Promise.all([
+        supabase.from("help_sections").select("*").order("sortOrder", { ascending: true }),
+        supabase.from("help_articles").select("*").order("sortOrder", { ascending: true }),
+        supabase.from("help_article_feedback").select("*").order("createdAt", { ascending: true }),
+      ]);
+
+      if (!isMounted) return;
+
+      if (sectionError || articleError || feedbackError) {
+        // eslint-disable-next-line no-console
+        console.error("Error loading help content", { sectionError, articleError, feedbackError });
+      } else {
+        setSections((sectionRows ?? []) as HelpSection[]);
+        setArticles((articleRows ?? []) as HelpArticle[]);
+        setFeedback((feedbackRows ?? []) as HelpArticleFeedback[]);
+      }
+
       // If we arrived here from an OAuth redirect, exchange the code for a session.
       // This is required in some SPA setups to persist the session locally.
       const url = new URL(window.location.href);
@@ -58,7 +79,7 @@ export function HelpProvider({ children }: { children: React.ReactNode }) {
       setIsAdmin(!!data.session?.user);
     };
 
-    void initAuth();
+    void initAuthAndData();
 
     const {
       data: { subscription },
@@ -98,13 +119,21 @@ export function HelpProvider({ children }: { children: React.ReactNode }) {
     ));
   }, [articles]);
 
-  const addFeedback = useCallback((articleId: string, wasHelpful: boolean) => {
-    setFeedback(prev => [...prev, {
+  const addFeedback = useCallback(async (articleId: string, wasHelpful: boolean) => {
+    const item: HelpArticleFeedback = {
       id: crypto.randomUUID(),
       articleId,
       wasHelpful,
       createdAt: new Date().toISOString(),
-    }]);
+    };
+
+    setFeedback(prev => [...prev, item]);
+
+    const { error } = await supabase.from("help_article_feedback").insert(item);
+    if (error) {
+      // eslint-disable-next-line no-console
+      console.error("Error saving article feedback", error);
+    }
   }, []);
 
   return (

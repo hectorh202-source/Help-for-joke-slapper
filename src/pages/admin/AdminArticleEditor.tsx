@@ -5,6 +5,7 @@ import { HelpArticle } from "@/types/help";
 import { ArrowLeft, Eye, Save } from "lucide-react";
 import { toast } from "sonner";
 import { MarkdownRenderer } from "@/components/help/MarkdownRenderer";
+import { supabase } from "@/lib/supabaseClient";
 
 const AdminArticleEditor = () => {
   const { id } = useParams<{ id: string }>();
@@ -36,7 +37,7 @@ const AdminArticleEditor = () => {
     return null;
   }
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!title.trim()) {
       toast.error("Title is required");
       return;
@@ -48,19 +49,69 @@ const AdminArticleEditor = () => {
 
     const now = new Date().toISOString();
     if (isNew) {
+      const newId = crypto.randomUUID();
       const newArticle: HelpArticle = {
-        id: crypto.randomUUID(),
-        title, slug, summary, body, sectionId,
+        id: newId,
+        title,
+        slug,
+        summary,
+        body,
+        sectionId,
         sortOrder: articles.filter(a => a.sectionId === sectionId).length,
-        isPublished, isFeatured, isPopular,
-        createdAt: now, updatedAt: now,
+        isPublished,
+        isFeatured,
+        isPopular,
+        createdAt: now,
+        updatedAt: now,
       };
+
       setArticles(prev => [...prev, newArticle]);
+
+      const { error } = await supabase.from("help_articles").insert(newArticle);
+      if (error) {
+        // eslint-disable-next-line no-console
+        console.error("Error creating article", error);
+        toast.error("Failed to save article to the database.");
+        return;
+      }
+
       toast.success("Article created!");
     } else {
       setArticles(prev => prev.map(a => a.id === id ? {
-        ...a, title, slug, summary, body, sectionId, isPublished, isFeatured, isPopular, updatedAt: now,
+        ...a,
+        title,
+        slug,
+        summary,
+        body,
+        sectionId,
+        isPublished,
+        isFeatured,
+        isPopular,
+        updatedAt: now,
       } : a));
+
+      const { error } = await supabase
+        .from("help_articles")
+        .update({
+          title,
+          slug,
+          summary,
+          body,
+          sectionId,
+          isPublished,
+          isFeatured,
+          isPopular,
+          updatedAt: now,
+        })
+        .eq("id", id!);
+
+      if (error) {
+        // eslint-disable-next-line no-console
+        console.error("Error updating article", error);
+        toast.error("Failed to update article in the database.");
+        return;
+      }
+
       toast.success("Article saved!");
     }
     navigate("/admin/help");

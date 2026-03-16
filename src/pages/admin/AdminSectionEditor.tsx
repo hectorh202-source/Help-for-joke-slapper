@@ -4,6 +4,7 @@ import { useHelp } from "@/contexts/HelpContext";
 import { HelpSection } from "@/types/help";
 import { ArrowLeft, Save } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/lib/supabaseClient";
 
 const ICON_OPTIONS = [
   "Rocket", "Zap", "FileText", "CreditCard", "User", "DollarSign", "Smile",
@@ -38,26 +39,67 @@ const AdminSectionEditor = () => {
 
   const topSections = sections.filter(s => s.parentId === null && s.id !== id);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!title.trim()) {
       toast.error("Title is required");
       return;
     }
     const now = new Date().toISOString();
     if (isNew) {
+      const newId = crypto.randomUUID();
       const newSection: HelpSection = {
-        id: crypto.randomUUID(),
-        title, slug, icon, parentId,
+        id: newId,
+        title,
+        slug,
+        icon,
+        parentId,
         sortOrder: sections.filter(s => s.parentId === parentId).length,
         isPublished,
-        createdAt: now, updatedAt: now,
+        createdAt: now,
+        updatedAt: now,
       };
+
       setSections(prev => [...prev, newSection]);
+
+      const { error } = await supabase.from("help_sections").insert(newSection);
+      if (error) {
+        // eslint-disable-next-line no-console
+        console.error("Error creating section", error);
+        toast.error("Failed to save section to the database.");
+        return;
+      }
+
       toast.success("Section created!");
     } else {
       setSections(prev => prev.map(s => s.id === id ? {
-        ...s, title, slug, icon, parentId, isPublished, updatedAt: now,
+        ...s,
+        title,
+        slug,
+        icon,
+        parentId,
+        isPublished,
+        updatedAt: now,
       } : s));
+
+      const { error } = await supabase
+        .from("help_sections")
+        .update({
+          title,
+          slug,
+          icon,
+          parentId,
+          isPublished,
+          updatedAt: now,
+        })
+        .eq("id", id!);
+
+      if (error) {
+        // eslint-disable-next-line no-console
+        console.error("Error updating section", error);
+        toast.error("Failed to update section in the database.");
+        return;
+      }
+
       toast.success("Section saved!");
     }
     navigate("/admin/help");
