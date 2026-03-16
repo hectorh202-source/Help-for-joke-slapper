@@ -1,7 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { useHelp } from "@/contexts/HelpContext";
 import { HelpLayout } from "@/components/help/HelpLayout";
-import { HelpBreadcrumbs } from "@/components/help/HelpBreadcrumbs";
 import { motion } from "framer-motion";
 import { FileText } from "lucide-react";
 import * as Icons from "lucide-react";
@@ -13,7 +12,7 @@ function getIcon(name: string) {
 
 const HelpSectionPage = () => {
   const { slug } = useParams<{ slug: string }>();
-  const { getSection, getChildSections, getArticlesForSection, getSectionPath, sections } = useHelp();
+  const { getSection, getChildSections, getArticlesForSection, sections } = useHelp();
   const section = getSection(slug || "");
 
   if (!section) {
@@ -26,10 +25,6 @@ const HelpSectionPage = () => {
       </HelpLayout>
     );
   }
-
-  const path = getSectionPath(section.id);
-  const breadcrumbs: { label: string; href?: string }[] = path.slice(0, -1).map(s => ({ label: s.title, href: `/help/${s.slug}` }));
-  breadcrumbs.push({ label: section.title });
 
   const childSections = getChildSections(section.id);
   const sectionArticles = getArticlesForSection(section.id);
@@ -45,7 +40,6 @@ const HelpSectionPage = () => {
         transition={{ duration: 0.3, ease: [0.2, 0, 0, 1] }}
         className="py-10 px-6 lg:px-12 max-w-[900px]"
       >
-        <HelpBreadcrumbs items={breadcrumbs} />
         <h1 className="text-4xl font-semibold tracking-tight text-foreground mb-2" style={{ letterSpacing: "-0.03em" }}>
           {section.title}
         </h1>
