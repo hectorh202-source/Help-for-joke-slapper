@@ -461,20 +461,21 @@ const AdminHelp = () => {
                         </td>
                         <td className="px-4 py-3 text-muted-foreground">{getParentTitle(section.parentId)}</td>
                         <td className="px-4 py-3">
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                            section.isPublished ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"
-                          }`}>
+                          <button
+                            onClick={() => toggleSectionPublish(section)}
+                            className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium transition-opacity hover:opacity-80 ${
+                              section.isPublished ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"
+                            }`}
+                            title={section.isPublished ? "Click to Unpublish" : "Click to Publish"}
+                          >
                             {section.isPublished ? "Published" : "Draft"}
-                          </span>
+                          </button>
                         </td>
                         <td className="px-4 py-3 text-right">
                           <div className="flex items-center justify-end gap-1">
                             <button onClick={() => moveSection(section.id, "up")} className="p-1.5 rounded hover:bg-muted text-muted-foreground" title="Move up">↑</button>
                             <button onClick={() => moveSection(section.id, "down")} className="p-1.5 rounded hover:bg-muted text-muted-foreground" title="Move down">↓</button>
                             <button onClick={() => navigate(`/admin/help/section/${section.id}`)} className="p-1.5 rounded hover:bg-muted text-muted-foreground text-xs">Edit</button>
-                            <button onClick={() => toggleSectionPublish(section)} className="p-1.5 rounded hover:bg-muted text-muted-foreground text-xs">
-                              {section.isPublished ? "Unpublish" : "Publish"}
-                            </button>
                             <button onClick={() => deleteSection(section.id)} className="p-1.5 rounded hover:bg-destructive/10 text-destructive text-xs">Delete</button>
                           </div>
                         </td>
@@ -499,11 +500,15 @@ const AdminHelp = () => {
                                       <div className="flex items-center gap-3">
                                         <div className="font-medium text-sm text-foreground">{article.title}</div>
                                         <div className="flex items-center gap-1.5">
-                                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium ${
-                                            article.isPublished ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"
-                                          }`}>
+                                          <button
+                                            onClick={() => togglePublish(article)}
+                                            className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium transition-opacity hover:opacity-80 ${
+                                              article.isPublished ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"
+                                            }`}
+                                            title={article.isPublished ? "Click to Unpublish" : "Click to Publish"}
+                                          >
                                             {article.isPublished ? "Published" : "Draft"}
-                                          </span>
+                                          </button>
                                           {article.isFeatured && <span className="text-[10px] font-medium text-muted-foreground">⭐ Featured</span>}
                                           {article.isPopular && <span className="text-[10px] font-medium text-muted-foreground">🔥 Popular</span>}
                                         </div>
@@ -512,9 +517,6 @@ const AdminHelp = () => {
                                         <button onClick={() => moveArticle(article.id, "up")} className="p-1.5 rounded hover:bg-muted text-muted-foreground" title="Move up">↑</button>
                                         <button onClick={() => moveArticle(article.id, "down")} className="p-1.5 rounded hover:bg-muted text-muted-foreground" title="Move down">↓</button>
                                         <button onClick={() => navigate(`/admin/help/article/${article.id}`)} className="p-1.5 rounded hover:bg-muted text-muted-foreground text-xs font-medium">Edit</button>
-                                        <button onClick={() => togglePublish(article)} className="p-1.5 rounded hover:bg-muted text-muted-foreground text-xs font-medium">
-                                          {article.isPublished ? "Unpublish" : "Publish"}
-                                        </button>
                                         <button onClick={() => deleteArticle(article.id)} className="p-1.5 rounded hover:bg-destructive/10 text-destructive text-xs font-medium">Delete</button>
                                       </div>
                                     </div>
@@ -559,11 +561,15 @@ const AdminHelp = () => {
                     </td>
                     <td className="px-4 py-3 text-muted-foreground">{getSectionTitle(article.sectionId)}</td>
                     <td className="px-4 py-3">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                        article.isPublished ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"
-                      }`}>
+                      <button
+                        onClick={() => togglePublish(article)}
+                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium transition-opacity hover:opacity-80 ${
+                          article.isPublished ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"
+                        }`}
+                        title={article.isPublished ? "Click to Unpublish" : "Click to Publish"}
+                      >
                         {article.isPublished ? "Published" : "Draft"}
-                      </span>
+                      </button>
                     </td>
                     <td className="px-4 py-3 text-xs text-muted-foreground">
                       {article.isFeatured && <span className="mr-2">⭐ Featured</span>}
@@ -572,9 +578,6 @@ const AdminHelp = () => {
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-1">
                         <button onClick={() => navigate(`/admin/help/article/${article.id}`)} className="p-1.5 rounded hover:bg-muted text-muted-foreground text-xs">Edit</button>
-                        <button onClick={() => togglePublish(article)} className="p-1.5 rounded hover:bg-muted text-muted-foreground text-xs">
-                          {article.isPublished ? "Unpublish" : "Publish"}
-                        </button>
                         <button onClick={() => deleteArticle(article.id)} className="p-1.5 rounded hover:bg-destructive/10 text-destructive text-xs">Delete</button>
                       </div>
                     </td>
