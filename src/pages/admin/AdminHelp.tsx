@@ -1,7 +1,7 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useHelp } from "@/contexts/HelpContext";
 import { Link, useNavigate } from "react-router-dom";
-import { Plus, FileText, FolderOpen, Search, Eye, Settings, Lock, LogIn, LogOut } from "lucide-react";
+import { Plus, FileText, FolderOpen, Search, Eye, Settings, Lock, LogIn, LogOut, ChevronRight, ChevronDown } from "lucide-react";
 import { HelpSection, HelpArticle } from "@/types/help";
 import { supabase } from "@/lib/supabaseClient";
 import { setPostAuthRedirectPath } from "@/components/AuthRedirectHandler";
@@ -11,6 +11,7 @@ const AdminHelp = () => {
   const navigate = useNavigate();
   const [tab, setTab] = useState<"articles" | "sections">("sections");
   const [search, setSearch] = useState("");
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
   const [statusFilter, setStatusFilter] = useState<"all" | "published" | "draft">("all");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -137,6 +138,15 @@ const AdminHelp = () => {
       </div>
     );
   }
+
+  const toggleExpand = (id: string) => {
+    setExpandedSections(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   const filteredArticles = articles.filter(a => {
     const matchesSearch = a.title.toLowerCase().includes(search.toLowerCase());
@@ -389,33 +399,88 @@ const AdminHelp = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {filteredSections.map(section => (
-                  <tr key={section.id} className="hover:bg-muted/30 transition-colors">
-                    <td className="px-4 py-3">
-                      <div className="font-medium text-foreground">{section.title}</div>
-                      <div className="text-xs text-muted-foreground">/{section.slug}</div>
-                    </td>
-                    <td className="px-4 py-3 text-muted-foreground">{getParentTitle(section.parentId)}</td>
-                    <td className="px-4 py-3">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                        section.isPublished ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"
-                      }`}>
-                        {section.isPublished ? "Published" : "Draft"}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <button onClick={() => moveSection(section.id, "up")} className="p-1.5 rounded hover:bg-muted text-muted-foreground" title="Move up">↑</button>
-                        <button onClick={() => moveSection(section.id, "down")} className="p-1.5 rounded hover:bg-muted text-muted-foreground" title="Move down">↓</button>
-                        <button onClick={() => navigate(`/admin/help/section/${section.id}`)} className="p-1.5 rounded hover:bg-muted text-muted-foreground text-xs">Edit</button>
-                        <button onClick={() => toggleSectionPublish(section)} className="p-1.5 rounded hover:bg-muted text-muted-foreground text-xs">
-                          {section.isPublished ? "Unpublish" : "Publish"}
-                        </button>
-                        <button onClick={() => deleteSection(section.id)} className="p-1.5 rounded hover:bg-destructive/10 text-destructive text-xs">Delete</button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                {filteredSections.map(section => {
+                  const isExpanded = expandedSections.has(section.id);
+                  const sectionArticles = articles.filter(a => a.sectionId === section.id).sort((a, b) => a.sortOrder - b.sortOrder);
+                  
+                  return (
+                    <React.Fragment key={section.id}>
+                      <tr className="hover:bg-muted/30 transition-colors">
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-2">
+                            <button onClick={() => toggleExpand(section.id)} className="p-1 rounded hover:bg-muted text-muted-foreground flex-shrink-0">
+                              {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                            </button>
+                            <div>
+                              <div className="font-medium text-foreground">{section.title}</div>
+                              <div className="text-xs text-muted-foreground">/{section.slug}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-muted-foreground">{getParentTitle(section.parentId)}</td>
+                        <td className="px-4 py-3">
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                            section.isPublished ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"
+                          }`}>
+                            {section.isPublished ? "Published" : "Draft"}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            <button onClick={() => moveSection(section.id, "up")} className="p-1.5 rounded hover:bg-muted text-muted-foreground" title="Move up">↑</button>
+                            <button onClick={() => moveSection(section.id, "down")} className="p-1.5 rounded hover:bg-muted text-muted-foreground" title="Move down">↓</button>
+                            <button onClick={() => navigate(`/admin/help/section/${section.id}`)} className="p-1.5 rounded hover:bg-muted text-muted-foreground text-xs">Edit</button>
+                            <button onClick={() => toggleSectionPublish(section)} className="p-1.5 rounded hover:bg-muted text-muted-foreground text-xs">
+                              {section.isPublished ? "Unpublish" : "Publish"}
+                            </button>
+                            <button onClick={() => deleteSection(section.id)} className="p-1.5 rounded hover:bg-destructive/10 text-destructive text-xs">Delete</button>
+                          </div>
+                        </td>
+                      </tr>
+                      {isExpanded && (
+                        <tr className="bg-muted/10">
+                          <td colSpan={4} className="p-0 border-t border-border">
+                            <div className="p-4 pl-12">
+                              <div className="flex items-center justify-between mb-3">
+                                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Articles in {section.title}</h3>
+                                <button
+                                  onClick={() => navigate("/admin/help/article/new")}
+                                  className="text-xs font-medium text-primary hover:underline flex items-center gap-1"
+                                >
+                                  <Plus className="h-3 w-3" /> Add Article
+                                </button>
+                              </div>
+                              {sectionArticles.length > 0 ? (
+                                <div className="border border-border/50 rounded-lg overflow-hidden bg-background divide-y divide-border/50">
+                                  {sectionArticles.map(article => (
+                                    <div key={article.id} className="flex items-center justify-between p-3 hover:bg-muted/30 transition-colors">
+                                      <div>
+                                        <div className="font-medium text-sm text-foreground flex items-center gap-2">
+                                          {article.title}
+                                          {!article.isPublished && (
+                                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-100 text-amber-700">Draft</span>
+                                          )}
+                                        </div>
+                                        <div className="text-xs text-muted-foreground">/{article.slug}</div>
+                                      </div>
+                                      <div className="flex items-center gap-1">
+                                        <button onClick={() => moveArticle(article.id, "up")} className="p-1.5 rounded hover:bg-muted text-muted-foreground" title="Move up">↑</button>
+                                        <button onClick={() => moveArticle(article.id, "down")} className="p-1.5 rounded hover:bg-muted text-muted-foreground" title="Move down">↓</button>
+                                        <button onClick={() => navigate(`/admin/help/article/${article.id}`)} className="p-1.5 rounded hover:bg-muted text-muted-foreground text-xs font-medium">Edit</button>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <div className="text-xs text-muted-foreground italic py-2">No articles in this section.</div>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
+                  );
+                })}
               </tbody>
             </table>
             {filteredSections.length === 0 && (
