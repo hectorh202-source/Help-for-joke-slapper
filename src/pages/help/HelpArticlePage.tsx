@@ -3,6 +3,7 @@ import { useHelp } from "@/contexts/HelpContext";
 import { HelpLayout } from "@/components/help/HelpLayout";
 import { HelpRightColumn } from "@/components/help/HelpRightColumn";
 import { HelpPrevNext } from "@/components/help/HelpPrevNext";
+import { HelpFeedback } from "@/components/help/HelpFeedback";
 import { MarkdownRenderer } from "@/components/help/MarkdownRenderer";
 import { motion } from "framer-motion";
 
@@ -59,6 +60,7 @@ const HelpArticlePage = () => {
             {article.title}
           </h1>
           <MarkdownRenderer content={article.body} />
+          <HelpFeedback articleId={article.id} />
           <HelpPrevNext prev={prev} next={next} />
         </motion.article>
 

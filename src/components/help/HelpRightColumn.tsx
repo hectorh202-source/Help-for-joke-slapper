@@ -1,7 +1,5 @@
 import { useTableOfContents } from "@/hooks/useTableOfContents";
-import { useState } from "react";
-import { useHelp } from "@/contexts/HelpContext";
-import { ThumbsUp, ThumbsDown, Link2, Flag, MessageCircle } from "lucide-react";
+import { Link2, Flag, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 
 interface HelpRightColumnProps {
@@ -12,14 +10,6 @@ interface HelpRightColumnProps {
 
 export function HelpRightColumn({ body, articleId, articleSlug }: HelpRightColumnProps) {
   const headings = useTableOfContents(body);
-  const { addFeedback } = useHelp();
-  const [feedbackGiven, setFeedbackGiven] = useState<boolean | null>(null);
-
-  const handleFeedback = (helpful: boolean) => {
-    addFeedback(articleId, helpful);
-    setFeedbackGiven(helpful);
-    toast.success("Thanks for your feedback!");
-  };
 
   const copyLink = () => {
     navigator.clipboard.writeText(window.location.origin + `/help/article/${articleSlug}`);
@@ -50,23 +40,6 @@ export function HelpRightColumn({ body, articleId, articleSlug }: HelpRightColum
           </nav>
         </div>
       )}
-
-      {/* Feedback */}
-      <div className="help-card-shadow rounded-lg border p-4 mb-4">
-        <p className="text-sm font-medium text-foreground mb-3">Was this helpful?</p>
-        {feedbackGiven === null ? (
-          <div className="flex gap-2">
-            <button onClick={() => handleFeedback(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-sm text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors">
-              <ThumbsUp className="h-3.5 w-3.5" /> Yes
-            </button>
-            <button onClick={() => handleFeedback(false)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-sm text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors">
-              <ThumbsDown className="h-3.5 w-3.5" /> No
-            </button>
-          </div>
-        ) : (
-          <p className="text-sm text-muted-foreground">Thank you for your feedback!</p>
-        )}
-      </div>
 
       {/* Quick actions */}
       <div className="space-y-1">
