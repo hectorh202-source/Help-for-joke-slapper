@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
 import { HelpSection, HelpArticle, HelpArticleFeedback } from "@/types/help";
+import { initialSections, initialArticles } from "@/data/helpData";
 import { supabase } from "@/lib/supabaseClient";
 
 interface HelpContextType {
@@ -22,8 +23,10 @@ interface HelpContextType {
 const HelpContext = createContext<HelpContextType | null>(null);
 
 export function HelpProvider({ children }: { children: React.ReactNode }) {
-  const [sections, setSections] = useState<HelpSection[]>([]);
-  const [articles, setArticles] = useState<HelpArticle[]>([]);
+  // Seed from hardcoded data so the site is never blank,
+  // then hydrate/override from Supabase when available.
+  const [sections, setSections] = useState<HelpSection[]>(initialSections);
+  const [articles, setArticles] = useState<HelpArticle[]>(initialArticles);
   const [feedback, setFeedback] = useState<HelpArticleFeedback[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
 
@@ -32,25 +35,30 @@ export function HelpProvider({ children }: { children: React.ReactNode }) {
 
     const initAuthAndData = async () => {
       // Load help content from Supabase
-      const [
-        { data: sectionRows, error: sectionError },
-        { data: articleRows, error: articleError },
-        { data: feedbackRows, error: feedbackError },
-      ] = await Promise.all([
-        supabase.from("help_sections").select("*").order("sortOrder", { ascending: true }),
-        supabase.from("help_articles").select("*").order("sortOrder", { ascending: true }),
-        supabase.from("help_article_feedback").select("*").order("createdAt", { ascending: true }),
-      ]);
+      try {
+        const [
+          { data: sectionRows, error: sectionError },
+          { data: articleRows, error: articleError },
+          { data: feedbackRows, error: feedbackError },
+        ] = await Promise.all([
+          supabase.from("help_sections").select("*"),
+          supabase.from("help_articles").select("*"),
+          supabase.from("help_article_feedback").select("*"),
+        ]);
 
-      if (!isMounted) return;
+        if (!isMounted) return;
 
-      if (sectionError || articleError || feedbackError) {
+        if (sectionError || articleError || feedbackError) {
+          // eslint-disable-next-line no-console
+          console.error("Error loading help content", { sectionError, articleError, feedbackError });
+        } else {
+          if (sectionRows) setSections(sectionRows as HelpSection[]);
+          if (articleRows) setArticles(articleRows as HelpArticle[]);
+          if (feedbackRows) setFeedback(feedbackRows as HelpArticleFeedback[]);
+        }
+      } catch (e) {
         // eslint-disable-next-line no-console
-        console.error("Error loading help content", { sectionError, articleError, feedbackError });
-      } else {
-        setSections((sectionRows ?? []) as HelpSection[]);
-        setArticles((articleRows ?? []) as HelpArticle[]);
-        setFeedback((feedbackRows ?? []) as HelpArticleFeedback[]);
+        console.error("Unexpected error loading help content", e);
       }
 
       // If we arrived here from an OAuth redirect, exchange the code for a session.
