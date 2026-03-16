@@ -495,19 +495,27 @@ const AdminHelp = () => {
                               {sectionArticles.length > 0 ? (
                                 <div className="border border-border/50 rounded-lg overflow-hidden bg-background divide-y divide-border/50">
                                   {sectionArticles.map(article => (
-                                    <div key={article.id} className="flex items-center justify-between p-3 hover:bg-muted/30 transition-colors">
-                                      <div>
-                                        <div className="font-medium text-sm text-foreground flex items-center gap-2">
-                                          {article.title}
-                                          {!article.isPublished && (
-                                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-100 text-amber-700">Draft</span>
-                                          )}
+                                    <div key={article.id} className="flex items-center justify-between flex-wrap gap-2 p-3 hover:bg-muted/30 transition-colors">
+                                      <div className="flex items-center gap-3">
+                                        <div className="font-medium text-sm text-foreground">{article.title}</div>
+                                        <div className="flex items-center gap-1.5">
+                                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium ${
+                                            article.isPublished ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"
+                                          }`}>
+                                            {article.isPublished ? "Published" : "Draft"}
+                                          </span>
+                                          {article.isFeatured && <span className="text-[10px] font-medium text-muted-foreground">⭐ Featured</span>}
+                                          {article.isPopular && <span className="text-[10px] font-medium text-muted-foreground">🔥 Popular</span>}
                                         </div>
                                       </div>
                                       <div className="flex items-center gap-1">
                                         <button onClick={() => moveArticle(article.id, "up")} className="p-1.5 rounded hover:bg-muted text-muted-foreground" title="Move up">↑</button>
                                         <button onClick={() => moveArticle(article.id, "down")} className="p-1.5 rounded hover:bg-muted text-muted-foreground" title="Move down">↓</button>
                                         <button onClick={() => navigate(`/admin/help/article/${article.id}`)} className="p-1.5 rounded hover:bg-muted text-muted-foreground text-xs font-medium">Edit</button>
+                                        <button onClick={() => togglePublish(article)} className="p-1.5 rounded hover:bg-muted text-muted-foreground text-xs font-medium">
+                                          {article.isPublished ? "Unpublish" : "Publish"}
+                                        </button>
+                                        <button onClick={() => deleteArticle(article.id)} className="p-1.5 rounded hover:bg-destructive/10 text-destructive text-xs font-medium">Delete</button>
                                       </div>
                                     </div>
                                   ))}
