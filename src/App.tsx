@@ -1,3 +1,4 @@
+import { ScrollToTop } from "./components/ScrollToTop";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -21,6 +22,7 @@ const App = () => (
       <Sonner />
       <HelpProvider>
         <BrowserRouter>
+          <ScrollToTop />
           <Routes>
             <Route path="/" element={<Navigate to="/help" replace />} />
             <Route path="/help" element={<HelpHome />} />
