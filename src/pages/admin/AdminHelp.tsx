@@ -549,8 +549,6 @@ const AdminHelp = () => {
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <button onClick={() => moveArticle(article.id, "up")} className="p-1.5 rounded hover:bg-muted text-muted-foreground" title="Move up">↑</button>
-                        <button onClick={() => moveArticle(article.id, "down")} className="p-1.5 rounded hover:bg-muted text-muted-foreground" title="Move down">↓</button>
                         <button onClick={() => navigate(`/admin/help/article/${article.id}`)} className="p-1.5 rounded hover:bg-muted text-muted-foreground text-xs">Edit</button>
                         <button onClick={() => togglePublish(article)} className="p-1.5 rounded hover:bg-muted text-muted-foreground text-xs">
                           {article.isPublished ? "Unpublish" : "Publish"}
