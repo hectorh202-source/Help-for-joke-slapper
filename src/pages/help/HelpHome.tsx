@@ -29,14 +29,13 @@ const HelpHome = () => {
   const troubleshootingArticles = articles.filter(a => a.sectionId === "troubleshooting" && a.isPublished).slice(0, 4);
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-sm border-b border-border">
-        <div className="max-w-[1440px] mx-auto px-6 h-14 flex items-center justify-between">
-          <Link to="/help" className="text-base font-semibold text-foreground">Joke Slapper Help</Link>
-          <Link to="/admin/help" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Admin</Link>
-        </div>
-      </header>
+    <div className="min-h-screen bg-background relative">
+      <Link 
+        to="/admin/help" 
+        className="absolute top-4 right-4 z-50 text-sm text-muted-foreground hover:text-foreground transition-colors hidden lg:block"
+      >
+        Admin
+      </Link>
 
       {/* Hero */}
       <motion.section
