@@ -332,16 +332,16 @@ const AdminHelp = () => {
         {/* Tabs */}
         <div className="flex items-center gap-6 mb-6 border-b border-border">
           <button
-            onClick={() => setTab("articles")}
-            className={`pb-3 text-sm font-medium border-b-2 transition-colors ${tab === "articles" ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
-          >
-            <FileText className="h-4 w-4 inline mr-1.5" />Articles ({articles.length})
-          </button>
-          <button
             onClick={() => setTab("sections")}
             className={`pb-3 text-sm font-medium border-b-2 transition-colors ${tab === "sections" ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
           >
             <FolderOpen className="h-4 w-4 inline mr-1.5" />Sections ({sections.length})
+          </button>
+          <button
+            onClick={() => setTab("articles")}
+            className={`pb-3 text-sm font-medium border-b-2 transition-colors ${tab === "articles" ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+          >
+            <FileText className="h-4 w-4 inline mr-1.5" />Articles ({articles.length})
           </button>
         </div>
 
@@ -376,9 +376,57 @@ const AdminHelp = () => {
           </button>
         </div>
 
+        {/* Sections table */}
+        {tab === "sections" && (
+          <div className="border border-border rounded-xl overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="bg-muted/50">
+                <tr>
+                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Title</th>
+                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Parent</th>
+                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Status</th>
+                  <th className="text-right px-4 py-3 font-medium text-muted-foreground">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {filteredSections.map(section => (
+                  <tr key={section.id} className="hover:bg-muted/30 transition-colors">
+                    <td className="px-4 py-3">
+                      <div className="font-medium text-foreground">{section.title}</div>
+                      <div className="text-xs text-muted-foreground">/{section.slug}</div>
+                    </td>
+                    <td className="px-4 py-3 text-muted-foreground">{getParentTitle(section.parentId)}</td>
+                    <td className="px-4 py-3">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                        section.isPublished ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"
+                      }`}>
+                        {section.isPublished ? "Published" : "Draft"}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        <button onClick={() => moveSection(section.id, "up")} className="p-1.5 rounded hover:bg-muted text-muted-foreground" title="Move up">↑</button>
+                        <button onClick={() => moveSection(section.id, "down")} className="p-1.5 rounded hover:bg-muted text-muted-foreground" title="Move down">↓</button>
+                        <button onClick={() => navigate(`/admin/help/section/${section.id}`)} className="p-1.5 rounded hover:bg-muted text-muted-foreground text-xs">Edit</button>
+                        <button onClick={() => toggleSectionPublish(section)} className="p-1.5 rounded hover:bg-muted text-muted-foreground text-xs">
+                          {section.isPublished ? "Unpublish" : "Publish"}
+                        </button>
+                        <button onClick={() => deleteSection(section.id)} className="p-1.5 rounded hover:bg-destructive/10 text-destructive text-xs">Delete</button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {filteredSections.length === 0 && (
+              <div className="p-8 text-center text-muted-foreground">No sections found.</div>
+            )}
+          </div>
+        )}
+
         {/* Articles table */}
         {tab === "articles" && (
-          <div className="border border-border rounded-xl overflow-hidden">
+          <div className="border border-border rounded-xl overflow-hidden mt-6">
             <table className="w-full text-sm">
               <thead className="bg-muted/50">
                 <tr>
@@ -425,54 +473,6 @@ const AdminHelp = () => {
             </table>
             {filteredArticles.length === 0 && (
               <div className="p-8 text-center text-muted-foreground">No articles found.</div>
-            )}
-          </div>
-        )}
-
-        {/* Sections table */}
-        {tab === "sections" && (
-          <div className="border border-border rounded-xl overflow-hidden">
-            <table className="w-full text-sm">
-              <thead className="bg-muted/50">
-                <tr>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Title</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Parent</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Status</th>
-                  <th className="text-right px-4 py-3 font-medium text-muted-foreground">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {filteredSections.map(section => (
-                  <tr key={section.id} className="hover:bg-muted/30 transition-colors">
-                    <td className="px-4 py-3">
-                      <div className="font-medium text-foreground">{section.title}</div>
-                      <div className="text-xs text-muted-foreground">/{section.slug}</div>
-                    </td>
-                    <td className="px-4 py-3 text-muted-foreground">{getParentTitle(section.parentId)}</td>
-                    <td className="px-4 py-3">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                        section.isPublished ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"
-                      }`}>
-                        {section.isPublished ? "Published" : "Draft"}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <button onClick={() => moveSection(section.id, "up")} className="p-1.5 rounded hover:bg-muted text-muted-foreground" title="Move up">↑</button>
-                        <button onClick={() => moveSection(section.id, "down")} className="p-1.5 rounded hover:bg-muted text-muted-foreground" title="Move down">↓</button>
-                        <button onClick={() => navigate(`/admin/help/section/${section.id}`)} className="p-1.5 rounded hover:bg-muted text-muted-foreground text-xs">Edit</button>
-                        <button onClick={() => toggleSectionPublish(section)} className="p-1.5 rounded hover:bg-muted text-muted-foreground text-xs">
-                          {section.isPublished ? "Unpublish" : "Publish"}
-                        </button>
-                        <button onClick={() => deleteSection(section.id)} className="p-1.5 rounded hover:bg-destructive/10 text-destructive text-xs">Delete</button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {filteredSections.length === 0 && (
-              <div className="p-8 text-center text-muted-foreground">No sections found.</div>
             )}
           </div>
         )}
