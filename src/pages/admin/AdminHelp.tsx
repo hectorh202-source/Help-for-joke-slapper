@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useHelp } from "@/contexts/HelpContext";
 import { Link, useNavigate } from "react-router-dom";
 import { Plus, FileText, FolderOpen, Search, Eye, Settings, Lock, LogIn, LogOut, ChevronRight, ChevronDown } from "lucide-react";
@@ -11,7 +11,21 @@ const AdminHelp = () => {
   const navigate = useNavigate();
   const [tab, setTab] = useState<"articles" | "sections">("sections");
   const [search, setSearch] = useState("");
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(() => {
+    const saved = sessionStorage.getItem("adminExpandedSections");
+    if (saved) {
+      try {
+        return new Set(JSON.parse(saved));
+      } catch (e) {
+        // ignore
+      }
+    }
+    return new Set();
+  });
+
+  useEffect(() => {
+    sessionStorage.setItem("adminExpandedSections", JSON.stringify(Array.from(expandedSections)));
+  }, [expandedSections]);
   const [statusFilter, setStatusFilter] = useState<"all" | "published" | "draft">("all");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
