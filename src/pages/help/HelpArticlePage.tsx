@@ -1,4 +1,5 @@
 import { useParams, Link } from "react-router-dom";
+import { useMemo } from "react";
 import { useHelp } from "@/contexts/HelpContext";
 import { HelpLayout } from "@/components/help/HelpLayout";
 import { HelpRightColumn } from "@/components/help/HelpRightColumn";
@@ -8,7 +9,7 @@ import { motion } from "framer-motion";
 
 const HelpArticlePage = () => {
   const { slug } = useParams<{ slug: string }>();
-  const { getArticle, articles, sections } = useHelp();
+  const { getArticle, sections, articles, getChildSections, getArticlesForSection } = useHelp();
   const article = getArticle(slug || "");
 
   if (!article) {
@@ -23,36 +24,37 @@ const HelpArticlePage = () => {
     );
   }
 
-
-
-  // Find prev/next
-  let prev: typeof article | null = null;
-  let next: typeof article | null = null;
-
-  // Look up the "Getting Started" section by slug, since its ID is a UUID in the database.
-  const gettingStartedSection = sections.find(s => s.slug === "getting-started");
-
-  if (article.slug === "what-is-joke-slapper") {
-    // Special case for the intro article, next is the first getting-started article
-    if (gettingStartedSection) {
-      const gettingStartedArticles = articles
-        .filter(a => a.sectionId === gettingStartedSection.id && a.isPublished)
-        .sort((a, b) => a.sortOrder - b.sortOrder);
-      next = gettingStartedArticles.length > 0 ? gettingStartedArticles[0] : null;
-    }
-  } else {
-    const sameSection = articles.filter(a => a.sectionId === article.sectionId && a.isPublished).sort((a, b) => a.sortOrder - b.sortOrder);
-    const currentIdx = sameSection.findIndex(a => a.id === article.id);
+  // Globally order all published articles exactly how they appear in the Sidebar
+  const orderedArticles = useMemo(() => {
+    const ordered: typeof articles = [];
     
-    // Special case for the first article in getting-started to link back to the intro
-    if (gettingStartedSection && article.sectionId === gettingStartedSection.id && currentIdx === 0) {
-      prev = articles.find(a => a.slug === "what-is-joke-slapper") || null;
-    } else {
-      prev = currentIdx > 0 ? sameSection[currentIdx - 1] : null;
+    // Add introduction article first
+    const intro = getArticle("what-is-joke-slapper");
+    if (intro && intro.isPublished) {
+      ordered.push(intro);
     }
+
+    const traverse = (sectionsToTraverse: typeof sections) => {
+      for (const section of sectionsToTraverse) {
+        if (section.slug === "introduction") continue;
+
+        const children = getChildSections(section.id);
+        traverse(children);
+
+        const sectionArticles = getArticlesForSection(section.id);
+        ordered.push(...sectionArticles);
+      }
+    };
+
+    traverse(getChildSections(null));
     
-    next = currentIdx < sameSection.length - 1 ? sameSection[currentIdx + 1] : null;
-  }
+    return Array.from(new Set(ordered));
+  }, [sections, articles, getChildSections, getArticlesForSection, getArticle]);
+
+  const currentIdx = orderedArticles.findIndex(a => a.id === article.id);
+  
+  const prev: typeof article | null = currentIdx > 0 ? orderedArticles[currentIdx - 1] : null;
+  const next: typeof article | null = currentIdx !== -1 && currentIdx < orderedArticles.length - 1 ? orderedArticles[currentIdx + 1] : null;
 
   return (
     <HelpLayout activeSlug={article.slug}>
