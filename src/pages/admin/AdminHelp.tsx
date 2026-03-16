@@ -9,7 +9,7 @@ import { setPostAuthRedirectPath } from "@/components/AuthRedirectHandler";
 const AdminHelp = () => {
   const { sections, articles, isAdmin, setIsAdmin, setSections, setArticles } = useHelp();
   const navigate = useNavigate();
-  const [tab, setTab] = useState<"articles" | "sections">("articles");
+  const [tab, setTab] = useState<"articles" | "sections">("sections");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "published" | "draft">("all");
   const [email, setEmail] = useState("");
