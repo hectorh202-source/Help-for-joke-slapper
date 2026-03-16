@@ -62,6 +62,10 @@ const HelpArticlePage = () => {
           <MarkdownRenderer content={article.body} />
           <HelpFeedback articleId={article.id} />
           <HelpPrevNext prev={prev} next={next} />
+          
+          <div className="mt-8 pt-6 border-t text-sm text-muted-foreground">
+            Last updated: {new Date(article.updatedAt).toLocaleDateString()}
+          </div>
         </motion.article>
 
         <div className="py-10 pr-6">
