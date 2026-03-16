@@ -22,11 +22,18 @@ const sectionDescriptions: Record<string, string> = {
 };
 
 const HelpHome = () => {
-  const { getChildSections, articles } = useHelp();
+  const { getChildSections, articles, sections } = useHelp();
   const topSections = getChildSections(null).filter(s => s.slug !== "introduction");
   const popularArticles = articles.filter(a => a.isPopular && a.isPublished).slice(0, 6);
-  const gettingStartedArticles = articles.filter(a => a.sectionId === "getting-started" && a.isPublished).slice(0, 4);
-  const troubleshootingArticles = articles.filter(a => a.sectionId === "troubleshooting" && a.isPublished).slice(0, 4);
+  const gettingStartedSection = sections.find(s => s.slug === "getting-started");
+  const troubleshootingSection = sections.find(s => s.slug === "troubleshooting");
+
+  const gettingStartedArticles = gettingStartedSection
+    ? articles.filter(a => a.sectionId === gettingStartedSection.id && a.isPublished).slice(0, 4)
+    : [];
+  const troubleshootingArticles = troubleshootingSection
+    ? articles.filter(a => a.sectionId === troubleshootingSection.id && a.isPublished).slice(0, 4)
+    : [];
 
   return (
     <div className="min-h-screen bg-background relative">

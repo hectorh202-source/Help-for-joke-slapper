@@ -8,7 +8,7 @@ import { motion } from "framer-motion";
 
 const HelpArticlePage = () => {
   const { slug } = useParams<{ slug: string }>();
-  const { getArticle, articles } = useHelp();
+  const { getArticle, articles, sections } = useHelp();
   const article = getArticle(slug || "");
 
   if (!article) {
@@ -29,15 +29,23 @@ const HelpArticlePage = () => {
   let prev: typeof article | null = null;
   let next: typeof article | null = null;
 
+  // Look up the "Getting Started" section by slug, since its ID is a UUID in the database.
+  const gettingStartedSection = sections.find(s => s.slug === "getting-started");
+
   if (article.slug === "what-is-joke-slapper") {
     // Special case for the intro article, next is the first getting-started article
-    next = articles.find(a => a.sectionId === "getting-started" && a.sortOrder === 1 && a.isPublished) || null;
+    if (gettingStartedSection) {
+      const gettingStartedArticles = articles
+        .filter(a => a.sectionId === gettingStartedSection.id && a.isPublished)
+        .sort((a, b) => a.sortOrder - b.sortOrder);
+      next = gettingStartedArticles.length > 0 ? gettingStartedArticles[0] : null;
+    }
   } else {
     const sameSection = articles.filter(a => a.sectionId === article.sectionId && a.isPublished).sort((a, b) => a.sortOrder - b.sortOrder);
     const currentIdx = sameSection.findIndex(a => a.id === article.id);
     
     // Special case for the first article in getting-started to link back to the intro
-    if (article.sectionId === "getting-started" && currentIdx === 0) {
+    if (gettingStartedSection && article.sectionId === gettingStartedSection.id && currentIdx === 0) {
       prev = articles.find(a => a.slug === "what-is-joke-slapper") || null;
     } else {
       prev = currentIdx > 0 ? sameSection[currentIdx - 1] : null;
