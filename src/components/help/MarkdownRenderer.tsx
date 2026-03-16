@@ -36,6 +36,26 @@ function parseMarkdown(md: string): React.ReactNode[] {
       continue;
     }
 
+    // YouTube Video Auto-embed (lone URL on a line)
+    const ytMatch = line.trim().match(/^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})(?:\S+)?$/);
+    if (ytMatch) {
+      flushList();
+      const videoId = ytMatch[1];
+      elements.push(
+        <div key={`yt-${elements.length}`} className="relative w-[100%] pt-[56.25%] mb-4 rounded-xl overflow-hidden help-card-shadow border border-border">
+          <iframe
+            className="absolute top-0 left-0 w-full h-full"
+            src={`https://www.youtube.com/embed/${videoId}`}
+            title="YouTube video player"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          ></iframe>
+        </div>
+      );
+      i++;
+      continue;
+    }
+
     // Headings
     const headingMatch = line.match(/^(#{1,3})\s+(.+)$/);
     if (headingMatch) {
