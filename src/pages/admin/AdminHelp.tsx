@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useHelp } from "@/contexts/HelpContext";
 import { Link, useNavigate } from "react-router-dom";
 import { Plus, FileText, FolderOpen, Search, Eye, Settings, Lock, LogIn, LogOut, ChevronRight, ChevronDown } from "lucide-react";
@@ -148,13 +148,42 @@ const AdminHelp = () => {
     });
   };
 
-  const filteredArticles = articles.filter(a => {
+  const orderedArticles = useMemo(() => {
+    const ordered: typeof articles = [];
+    
+    const introSection = sections.find(s => s.slug === "introduction");
+    if (introSection) {
+      ordered.push(...articles.filter(a => a.sectionId === introSection.id).sort((a, b) => a.sortOrder - b.sortOrder));
+    } else {
+      const introArticle = articles.find(a => a.slug === "what-is-joke-slapper");
+      if (introArticle) ordered.push(introArticle);
+    }
+
+    const traverse = (sectionsToTraverse: typeof sections) => {
+      for (const section of sectionsToTraverse) {
+        if (section.slug === "introduction") continue;
+
+        const children = sections.filter(s => s.parentId === section.id).sort((a, b) => a.sortOrder - b.sortOrder);
+        traverse(children);
+
+        const sectionArticles = articles.filter(a => a.sectionId === section.id).sort((a, b) => a.sortOrder - b.sortOrder);
+        ordered.push(...sectionArticles);
+      }
+    };
+
+    const topLevel = sections.filter(s => !s.parentId).sort((a, b) => a.sortOrder - b.sortOrder);
+    traverse(topLevel);
+
+    const orderedIds = new Set(ordered.map(a => a.id));
+    const orphans = articles.filter(a => !orderedIds.has(a.id)).sort((a, b) => a.sortOrder - b.sortOrder);
+
+    return Array.from(new Set([...ordered, ...orphans]));
+  }, [sections, articles]);
+
+  const filteredArticles = orderedArticles.filter(a => {
     const matchesSearch = a.title.toLowerCase().includes(search.toLowerCase());
     const matchesStatus = statusFilter === "all" || (statusFilter === "published" ? a.isPublished : !a.isPublished);
     return matchesSearch && matchesStatus;
-  }).sort((a, b) => {
-    if (a.sectionId === b.sectionId) return a.sortOrder - b.sortOrder;
-    return a.sectionId.localeCompare(b.sectionId);
   });
 
   const filteredSections = sections
