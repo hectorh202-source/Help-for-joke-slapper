@@ -1,6 +1,5 @@
 import { ReactNode } from "react";
 import { HelpSidebar } from "./HelpSidebar";
-import { HelpSearch } from "./HelpSearch";
 import { Link } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
@@ -8,10 +7,9 @@ import { useState } from "react";
 interface HelpLayoutProps {
   children: ReactNode;
   activeSlug?: string;
-  showSearch?: boolean;
 }
 
-export function HelpLayout({ children, activeSlug, showSearch = true }: HelpLayoutProps) {
+export function HelpLayout({ children, activeSlug }: HelpLayoutProps) {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   return (
@@ -25,13 +23,6 @@ export function HelpLayout({ children, activeSlug, showSearch = true }: HelpLayo
           <Link to="/help" className="text-base font-semibold text-foreground whitespace-nowrap z-10">
             Joke Slapper Help
           </Link>
-          {showSearch && (
-            <div className="flex-1 flex justify-end lg:absolute lg:inset-0 lg:justify-center lg:items-center pointer-events-none">
-              <div className="w-full max-w-[200px] sm:max-w-md pointer-events-auto">
-                <HelpSearch variant="compact" />
-              </div>
-            </div>
-          )}
         </div>
       </header>
 

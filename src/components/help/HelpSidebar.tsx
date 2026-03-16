@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ChevronRight } from "lucide-react";
 import { HelpSection } from "@/types/help";
 import { motion, AnimatePresence } from "framer-motion";
+import { HelpSearch } from "./HelpSearch";
 import * as Icons from "lucide-react";
 
 function getIcon(name: string) {
@@ -109,13 +110,14 @@ export function HelpSidebar({ activeSlug }: { activeSlug?: string }) {
 
   return (
     <nav className="w-[280px] shrink-0 sticky top-0 h-screen overflow-y-auto bg-help-sidebar border-r border-border p-4 hidden lg:block">
-      <div className="mb-4">
+      <div className="mb-4 space-y-4">
         <button
           onClick={() => window.location.href = "/help"}
           className="text-lg font-semibold text-foreground tracking-tight"
         >
           Joke Slapper Help
         </button>
+        <HelpSearch variant="compact" />
       </div>
       <div className="space-y-0.5">
         {topSections.map(section => (
