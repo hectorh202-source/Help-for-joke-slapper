@@ -5,6 +5,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { HelpProvider } from "@/contexts/HelpContext";
+import AuthRedirectHandler from "@/components/AuthRedirectHandler";
 import HelpArticlePage from "./pages/help/HelpArticlePage";
 import HelpSectionPage from "./pages/help/HelpSectionPage";
 import AdminHelp from "./pages/admin/AdminHelp";
@@ -22,6 +23,7 @@ const App = () => (
       <HelpProvider>
         <BrowserRouter>
           <ScrollToTop />
+          <AuthRedirectHandler />
           <Routes>
             <Route path="/" element={<Navigate to="/help/article/what-is-joke-slapper" replace />} />
             <Route path="/help" element={<Navigate to="/help/article/what-is-joke-slapper" replace />} />

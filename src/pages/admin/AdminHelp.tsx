@@ -3,6 +3,8 @@ import { useHelp } from "@/contexts/HelpContext";
 import { Link, useNavigate } from "react-router-dom";
 import { Plus, FileText, FolderOpen, Search, Eye, Settings, Lock, LogIn, LogOut } from "lucide-react";
 import { HelpSection, HelpArticle } from "@/types/help";
+import { supabase } from "@/lib/supabaseClient";
+import { setPostAuthRedirectPath } from "@/components/AuthRedirectHandler";
 
 const AdminHelp = () => {
   const { sections, articles, isAdmin, setIsAdmin, setSections, setArticles } = useHelp();
@@ -10,6 +12,64 @@ const AdminHelp = () => {
   const [tab, setTab] = useState<"articles" | "sections">("articles");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "published" | "draft">("all");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [authLoading, setAuthLoading] = useState(false);
+
+  const handleEmailPasswordSignIn = async () => {
+    setAuthError(null);
+    setAuthLoading(true);
+    setPostAuthRedirectPath("/admin/help");
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      setAuthError(error.message);
+    }
+    setAuthLoading(false);
+  };
+
+  const handleSendMagicLink = async () => {
+    setAuthError(null);
+    setAuthLoading(true);
+    setPostAuthRedirectPath("/admin/help");
+
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: `${window.location.origin}/admin/help`,
+      },
+    });
+
+    if (error) setAuthError(error.message);
+    else setAuthError("Magic link sent. Check your email.");
+    setAuthLoading(false);
+  };
+
+  const handleForgotPassword = async () => {
+    setAuthError(null);
+    setAuthLoading(true);
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/admin/help`,
+    });
+
+    if (error) setAuthError(error.message);
+    else setAuthError("Password reset email sent. Check your inbox.");
+    setAuthLoading(false);
+  };
+
+  const handleAdminSignOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      // eslint-disable-next-line no-console
+      console.error("Supabase sign-out error", error);
+    }
+    setIsAdmin(false);
+  };
 
   if (!isAdmin) {
     return (
@@ -18,12 +78,61 @@ const AdminHelp = () => {
           <Lock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
           <h1 className="text-2xl font-semibold text-foreground mb-2">Admin Access Required</h1>
           <p className="text-muted-foreground mb-6">You need admin privileges to access the help center management.</p>
-          <button
-            onClick={() => setIsAdmin(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity"
-          >
-            <LogIn className="h-4 w-4" /> Sign in as Admin (Demo)
-          </button>
+
+          <div className="space-y-3 text-left">
+            <div>
+              <label className="block text-xs font-medium text-muted-foreground mb-1">Email</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@company.com"
+                className="w-full h-9 px-3 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+                autoComplete="email"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-muted-foreground mb-1">Password</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                className="w-full h-9 px-3 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+                autoComplete="current-password"
+              />
+            </div>
+
+            {authError && (
+              <div className="text-xs text-destructive">{authError}</div>
+            )}
+
+            <button
+              onClick={handleEmailPasswordSignIn}
+              disabled={authLoading || !email || !password}
+              className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
+            >
+              <LogIn className="h-4 w-4" /> {authLoading ? "Signing in..." : "Sign in"}
+            </button>
+
+            <div className="flex items-center justify-between">
+              <button
+                onClick={handleForgotPassword}
+                disabled={authLoading || !email}
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
+              >
+                Forgot password?
+              </button>
+              <button
+                onClick={handleSendMagicLink}
+                disabled={authLoading || !email}
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
+              >
+                Email me a magic link
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -101,7 +210,7 @@ const AdminHelp = () => {
             <Link to="/help" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
               <Eye className="h-4 w-4" /> View Help Center
             </Link>
-            <button onClick={() => setIsAdmin(false)} className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <button onClick={handleAdminSignOut} className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
               <LogOut className="h-4 w-4" /> Sign out
             </button>
           </div>

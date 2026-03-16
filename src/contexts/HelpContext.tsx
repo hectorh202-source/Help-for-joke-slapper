@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, useCallback } from "react";
+import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
 import { HelpSection, HelpArticle, HelpArticleFeedback } from "@/types/help";
 import { initialSections, initialArticles } from "@/data/helpData";
+import { supabase } from "@/lib/supabaseClient";
 
 interface HelpContextType {
   sections: HelpSection[];
@@ -26,6 +27,51 @@ export function HelpProvider({ children }: { children: React.ReactNode }) {
   const [articles, setArticles] = useState<HelpArticle[]>(initialArticles);
   const [feedback, setFeedback] = useState<HelpArticleFeedback[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const initAuth = async () => {
+      // If we arrived here from an OAuth redirect, exchange the code for a session.
+      // This is required in some SPA setups to persist the session locally.
+      const url = new URL(window.location.href);
+      const hasOAuthCode = url.searchParams.has("code");
+      if (hasOAuthCode) {
+        const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(window.location.href);
+        if (exchangeError) {
+          // eslint-disable-next-line no-console
+          console.error("Error exchanging OAuth code for session", exchangeError);
+        } else {
+          url.searchParams.delete("code");
+          url.searchParams.delete("state");
+          window.history.replaceState({}, document.title, url.toString());
+        }
+      }
+
+      const { data, error } = await supabase.auth.getSession();
+      if (!isMounted) return;
+      if (error) {
+        // eslint-disable-next-line no-console
+        console.error("Error getting Supabase session", error);
+        return;
+      }
+      setIsAdmin(!!data.session?.user);
+    };
+
+    void initAuth();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!isMounted) return;
+      setIsAdmin(!!session?.user);
+    });
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const getSection = useCallback((slug: string) => sections.find(s => s.slug === slug), [sections]);
   const getArticle = useCallback((slug: string) => articles.find(a => a.slug === slug), [articles]);
