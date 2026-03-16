@@ -115,7 +115,7 @@ export function HelpSidebar({ activeSlug }: { activeSlug?: string }) {
   const topSections = getChildSections(null);
 
   return (
-    <nav className="w-[280px] shrink-0 sticky top-0 h-screen overflow-y-auto bg-help-sidebar border-r border-border flex flex-col lg:flex hidden lg:block">
+    <nav className="w-[280px] shrink-0 sticky top-0 h-screen overflow-y-auto bg-help-sidebar border-r border-border flex flex-col">
       <div className="p-4 flex-1">
         <div className="mb-4 space-y-4">
           <button

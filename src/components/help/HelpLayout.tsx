@@ -33,7 +33,9 @@ export function HelpLayout({ children, activeSlug }: HelpLayoutProps) {
         )}
 
         {/* Desktop sidebar */}
-        <HelpSidebar activeSlug={activeSlug} />
+        <div className="hidden lg:block">
+          <HelpSidebar activeSlug={activeSlug} />
+        </div>
 
         {/* Main content */}
         <div className="flex-1 min-w-0 pt-16 lg:pt-0">
