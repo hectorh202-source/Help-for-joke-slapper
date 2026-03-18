@@ -176,74 +176,72 @@ const AdminArticleEditor = () => {
       </header>
 
       <div className="max-w-4xl mx-auto px-6 py-8">
-        {preview ? (
-          <div className="max-w-[720px]">
-            <h1 className="text-4xl font-semibold tracking-tight text-foreground mb-4" style={{ letterSpacing: "-0.03em" }}>{title}</h1>
-            {summary && <p className="text-muted-foreground mb-6">{summary}</p>}
-            <MarkdownRenderer content={body} />
+        <div className={preview ? "block max-w-[720px]" : "hidden"}>
+          <h1 className="text-4xl font-semibold tracking-tight text-foreground mb-4" style={{ letterSpacing: "-0.03em" }}>{title}</h1>
+          {summary && <p className="text-muted-foreground mb-6">{summary}</p>}
+          <MarkdownRenderer content={body} />
+        </div>
+
+        <div className={!preview ? "space-y-6" : "hidden"}>
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1.5">Title</label>
+            <input
+              type="text" value={title} onChange={e => setTitle(e.target.value)}
+              className="w-full h-10 px-3 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+              placeholder="Article title"
+            />
           </div>
-        ) : (
-          <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1.5">Title</label>
-              <input
-                type="text" value={title} onChange={e => setTitle(e.target.value)}
-                className="w-full h-10 px-3 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
-                placeholder="Article title"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1.5">Slug</label>
-              <input
-                type="text" value={slug} onChange={e => setSlug(e.target.value)}
-                className="w-full h-10 px-3 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
-                placeholder="article-slug"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1.5">Section</label>
-              <select
-                value={sectionId} onChange={e => setSectionId(e.target.value)}
-                className="w-full h-10 px-3 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
-              >
-                {sections.map(s => (
-                  <option key={s.id} value={s.id}>{s.parentId ? "  └ " : ""}{s.title}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1.5">Summary</label>
-              <input
-                type="text" value={summary} onChange={e => setSummary(e.target.value)}
-                className="w-full h-10 px-3 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
-                placeholder="Brief description"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-1.5">Body (Markdown)</label>
-              <textarea
-                value={body} onChange={e => setBody(e.target.value)}
-                rows={20}
-                className="w-full px-3 py-2 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 font-mono leading-relaxed resize-y"
-                placeholder="Write your article content here using Markdown..."
-              />
-            </div>
-            <div className="flex flex-wrap gap-6">
-              <label className="flex items-center gap-2 text-sm">
-                <input type="checkbox" checked={isPublished} onChange={e => setIsPublished(e.target.checked)} className="rounded" />
-                Published
-              </label>
-              <label className="flex items-center gap-2 text-sm">
-                <input type="checkbox" checked={isFeatured} onChange={e => setIsFeatured(e.target.checked)} className="rounded" />
-                Featured
-              </label>
-              <label className="flex items-center gap-2 text-sm">
-                <input type="checkbox" checked={isPopular} onChange={e => setIsPopular(e.target.checked)} className="rounded" />
-                Popular
-              </label>
-            </div>
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1.5">Slug</label>
+            <input
+              type="text" value={slug} onChange={e => setSlug(e.target.value)}
+              className="w-full h-10 px-3 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+              placeholder="article-slug"
+            />
           </div>
-        )}
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1.5">Section</label>
+            <select
+              value={sectionId} onChange={e => setSectionId(e.target.value)}
+              className="w-full h-10 px-3 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+            >
+              {sections.map(s => (
+                <option key={s.id} value={s.id}>{s.parentId ? "  └ " : ""}{s.title}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1.5">Summary</label>
+            <input
+              type="text" value={summary} onChange={e => setSummary(e.target.value)}
+              className="w-full h-10 px-3 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+              placeholder="Brief description"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1.5">Body (Markdown)</label>
+            <textarea
+              value={body} onChange={e => setBody(e.target.value)}
+              rows={20}
+              className="w-full px-3 py-2 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 font-mono leading-relaxed resize-y"
+              placeholder="Write your article content here using Markdown..."
+            />
+          </div>
+          <div className="flex flex-wrap gap-6">
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" checked={isPublished} onChange={e => setIsPublished(e.target.checked)} className="rounded" />
+              Published
+            </label>
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" checked={isFeatured} onChange={e => setIsFeatured(e.target.checked)} className="rounded" />
+              Featured
+            </label>
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" checked={isPopular} onChange={e => setIsPopular(e.target.checked)} className="rounded" />
+              Popular
+            </label>
+          </div>
+        </div>
       </div>
 
 
