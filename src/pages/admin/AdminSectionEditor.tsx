@@ -75,7 +75,7 @@ const AdminSectionEditor = () => {
       
       const swapIdx = direction === "up" ? idx - 1 : idx + 1;
       
-      const newSiblings = [...siblings];
+      const newSiblings = siblings.map(a => ({ ...a }));
       [newSiblings[idx], newSiblings[swapIdx]] = [newSiblings[swapIdx], newSiblings[idx]];
       
       newSiblings.forEach((a, index) => {
