@@ -15,25 +15,44 @@ const ICON_OPTIONS = [
 const AdminSectionEditor = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { sections, setSections, articles, setArticles, isAdmin } = useHelp();
+  const { sections, setSections, articles, setArticles, isAdmin, isLoading } = useHelp();
   const isNew = id === "new";
 
   const existing = !isNew ? sections.find(s => s.id === id) : null;
 
-  const [title, setTitle] = useState(existing?.title || "");
-  const [slug, setSlug] = useState(existing?.slug || "");
-  const [icon, setIcon] = useState(existing?.icon || "FileText");
-  const [parentId, setParentId] = useState<string | null>(existing?.parentId || null);
-  const [isPublished, setIsPublished] = useState(existing?.isPublished ?? true);
+  const [title, setTitle] = useState("");
+  const [slug, setSlug] = useState("");
+  const [icon, setIcon] = useState("FileText");
+  const [parentId, setParentId] = useState<string | null>(null);
+  const [isPublished, setIsPublished] = useState(true);
 
   useEffect(() => {
-    if (isNew) {
+    if (existing) {
+      setTitle(existing.title);
+      setSlug(existing.slug);
+      setIcon(existing.icon);
+      setParentId(existing.parentId);
+      setIsPublished(existing.isPublished);
+    }
+  }, [existing]);
+
+  useEffect(() => {
+    if (isNew && title) {
       setSlug(title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""));
     }
   }, [title, isNew]);
 
+  useEffect(() => {
+    if (!isLoading && !isAdmin) {
+      navigate("/admin/help");
+    }
+  }, [isLoading, isAdmin, navigate]);
+
+  if (isLoading) {
+    return <div className="min-h-screen bg-background flex items-center justify-center"><p className="text-muted-foreground animate-pulse">Loading...</p></div>;
+  }
+
   if (!isAdmin) {
-    navigate("/admin/help");
     return null;
   }
 

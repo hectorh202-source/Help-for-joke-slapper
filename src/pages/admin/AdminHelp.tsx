@@ -7,7 +7,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { setPostAuthRedirectPath } from "@/components/AuthRedirectHandler";
 
 const AdminHelp = () => {
-  const { sections, articles, isAdmin, setIsAdmin, setSections, setArticles } = useHelp();
+  const { sections, articles, isAdmin, setIsAdmin, setSections, setArticles, isLoading } = useHelp();
   const navigate = useNavigate();
   const [tab, setTab] = useState<"articles" | "sections">("sections");
   const [search, setSearch] = useState("");
@@ -85,6 +85,10 @@ const AdminHelp = () => {
     }
     setIsAdmin(false);
   };
+
+  if (isLoading) {
+    return <div className="min-h-screen bg-background flex items-center justify-center"><p className="text-muted-foreground animate-pulse">Loading...</p></div>;
+  }
 
   if (!isAdmin) {
     return (

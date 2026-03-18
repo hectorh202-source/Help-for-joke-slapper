@@ -10,30 +10,54 @@ import { supabase } from "@/lib/supabaseClient";
 const AdminArticleEditor = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { articles, sections, setArticles, isAdmin } = useHelp();
+  const { articles, sections, setArticles, isAdmin, isLoading } = useHelp();
   const isNew = id === "new";
 
   const existing = !isNew ? articles.find(a => a.id === id) : null;
 
-  const [title, setTitle] = useState(existing?.title || "");
-  const [slug, setSlug] = useState(existing?.slug || "");
-  const [summary, setSummary] = useState(existing?.summary || "");
-  const [body, setBody] = useState(existing?.body || "");
-  const [sectionId, setSectionId] = useState(existing?.sectionId || sections[0]?.id || "");
-  const [isPublished, setIsPublished] = useState(existing?.isPublished ?? false);
-  const [isFeatured, setIsFeatured] = useState(existing?.isFeatured ?? false);
-  const [isPopular, setIsPopular] = useState(existing?.isPopular ?? false);
+  const [title, setTitle] = useState("");
+  const [slug, setSlug] = useState("");
+  const [summary, setSummary] = useState("");
+  const [body, setBody] = useState("");
+  const [sectionId, setSectionId] = useState("");
+  const [isPublished, setIsPublished] = useState(false);
+  const [isFeatured, setIsFeatured] = useState(false);
+  const [isPopular, setIsPopular] = useState(false);
   const [preview, setPreview] = useState(false);
 
   useEffect(() => {
+    if (existing) {
+      setTitle(existing.title);
+      setSlug(existing.slug);
+      setSummary(existing.summary);
+      setBody(existing.body);
+      setSectionId(existing.sectionId);
+      setIsPublished(existing.isPublished);
+      setIsFeatured(existing.isFeatured);
+      setIsPopular(existing.isPopular);
+    } else if (isNew && sections.length > 0 && !sectionId) {
+      setSectionId(sections[0].id);
+    }
+  }, [existing, sections, isNew]);
+
+  useEffect(() => {
     if (!title && !isNew) return;
-    if (isNew) {
+    if (isNew && title) {
       setSlug(title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""));
     }
   }, [title, isNew]);
 
+  useEffect(() => {
+    if (!isLoading && !isAdmin) {
+      navigate("/admin/help");
+    }
+  }, [isLoading, isAdmin, navigate]);
+
+  if (isLoading) {
+    return <div className="min-h-screen bg-background flex items-center justify-center"><p className="text-muted-foreground animate-pulse">Loading...</p></div>;
+  }
+
   if (!isAdmin) {
-    navigate("/admin/help");
     return null;
   }
 
