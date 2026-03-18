@@ -246,25 +246,7 @@ const AdminArticleEditor = () => {
         )}
       </div>
 
-      {/* Status bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-sm border-t border-border">
-        <div className="max-w-4xl mx-auto px-6 h-12 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <label className="flex items-center gap-2 text-sm">
-              <input type="checkbox" checked={isPublished} onChange={e => setIsPublished(e.target.checked)} className="rounded" />
-              {isPublished ? "Published" : "Draft"}
-            </label>
-          </div>
-          <div className="flex items-center gap-2">
-            <button onClick={() => setPreview(!preview)} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-              {preview ? "Edit" : "Preview"}
-            </button>
-            <button onClick={handleSave} className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity">
-              Save Changes
-            </button>
-          </div>
-        </div>
-      </div>
+
     </div>
   );
 };
