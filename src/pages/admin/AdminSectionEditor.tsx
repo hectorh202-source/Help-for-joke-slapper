@@ -60,45 +60,47 @@ const AdminSectionEditor = () => {
   const sectionArticles = articles.filter(a => a.sectionId === id).sort((a, b) => a.sortOrder - b.sortOrder);
 
   const moveArticle = async (articleId: string, direction: "up" | "down") => {
-    let updated: HelpArticle[] | null = null;
+    let updates: { id: string; sortOrder: number }[] = [];
 
     setArticles(prev => {
       const article = prev.find(a => a.id === articleId);
       if (!article) return prev;
+      
       const siblings = prev
         .filter(a => a.sectionId === article.sectionId)
         .sort((a, b) => a.sortOrder - b.sortOrder);
+        
       const idx = siblings.findIndex(a => a.id === articleId);
       if ((direction === "up" && idx === 0) || (direction === "down" && idx === siblings.length - 1)) return prev;
+      
       const swapIdx = direction === "up" ? idx - 1 : idx + 1;
-      const swapArticle = siblings[swapIdx];
-      const next = prev.map(a => {
-        if (a.id === articleId) return { ...a, sortOrder: swapArticle.sortOrder };
-        if (a.id === swapArticle.id) return { ...a, sortOrder: article.sortOrder };
-        return a;
+      
+      const newSiblings = [...siblings];
+      [newSiblings[idx], newSiblings[swapIdx]] = [newSiblings[swapIdx], newSiblings[idx]];
+      
+      newSiblings.forEach((a, index) => {
+        a.sortOrder = index;
       });
-      updated = next;
-      return next;
+
+      updates = newSiblings.map(a => ({ id: a.id, sortOrder: a.sortOrder }));
+
+      return prev.map(a => {
+        const updated = updates.find(u => u.id === a.id);
+        return updated ? { ...a, sortOrder: updated.sortOrder } : a;
+      });
     });
 
-    if (!updated) return;
-    const current = updated.find(a => a.id === articleId);
-    const swap = updated.find(
-      a =>
-        a.sectionId === current?.sectionId &&
-        a.id !== current.id &&
-        a.sortOrder === (direction === "up" ? (current?.sortOrder ?? 0) + 1 : (current?.sortOrder ?? 0) - 1),
+    if (updates.length === 0) return;
+
+    const promises = updates.map(u => 
+      supabase.from("help_articles").update({ sort_order: u.sortOrder }).eq("id", u.id)
     );
-    if (!current || !swap) return;
 
-    const [res1, res2] = await Promise.all([
-      supabase.from("help_articles").update({ sort_order: current.sortOrder }).eq("id", current.id),
-      supabase.from("help_articles").update({ sort_order: swap.sortOrder }).eq("id", swap.id),
-    ]);
-
-    if (res1.error || res2.error) {
+    const results = await Promise.all(promises);
+    const hasError = results.some(r => r.error);
+    if (hasError) {
       // eslint-disable-next-line no-console
-      console.error("Error updating article sort order", res1.error || res2.error);
+      console.error("Error updating article sort orders", results.filter(r => r.error));
     }
   };
 

@@ -283,82 +283,92 @@ const AdminHelp = () => {
   };
 
   const moveArticle = async (id: string, direction: "up" | "down") => {
-    let newArticleSortOrder: number | undefined;
-    let newSwapArticleSortOrder: number | undefined;
-    let swapArticleId: string | undefined;
+    let updates: { id: string; sortOrder: number }[] = [];
 
     setArticles(prev => {
       const article = prev.find(a => a.id === id);
       if (!article) return prev;
+      
       const siblings = prev
         .filter(a => a.sectionId === article.sectionId)
         .sort((a, b) => a.sortOrder - b.sortOrder);
+        
       const idx = siblings.findIndex(a => a.id === id);
       if ((direction === "up" && idx === 0) || (direction === "down" && idx === siblings.length - 1)) return prev;
-      const swapIdx = direction === "up" ? idx - 1 : idx + 1;
-      const swapArticle = siblings[swapIdx];
       
-      swapArticleId = swapArticle.id;
-      newArticleSortOrder = swapArticle.sortOrder;
-      newSwapArticleSortOrder = article.sortOrder;
+      const swapIdx = direction === "up" ? idx - 1 : idx + 1;
+      
+      const newSiblings = [...siblings];
+      [newSiblings[idx], newSiblings[swapIdx]] = [newSiblings[swapIdx], newSiblings[idx]];
+      
+      newSiblings.forEach((a, index) => {
+        a.sortOrder = index;
+      });
+
+      updates = newSiblings.map(a => ({ id: a.id, sortOrder: a.sortOrder }));
 
       return prev.map(a => {
-        if (a.id === id) return { ...a, sortOrder: newArticleSortOrder! };
-        if (a.id === swapArticle.id) return { ...a, sortOrder: newSwapArticleSortOrder! };
-        return a;
+        const updated = updates.find(u => u.id === a.id);
+        return updated ? { ...a, sortOrder: updated.sortOrder } : a;
       });
     });
 
-    if (!swapArticleId || newArticleSortOrder === undefined || newSwapArticleSortOrder === undefined) return;
+    if (updates.length === 0) return;
 
-    const [res1, res2] = await Promise.all([
-      supabase.from("help_articles").update({ sort_order: newArticleSortOrder }).eq("id", id),
-      supabase.from("help_articles").update({ sort_order: newSwapArticleSortOrder }).eq("id", swapArticleId),
-    ]);
+    const promises = updates.map(u => 
+      supabase.from("help_articles").update({ sort_order: u.sortOrder }).eq("id", u.id)
+    );
 
-    if (res1.error || res2.error) {
+    const results = await Promise.all(promises);
+    const hasError = results.some(r => r.error);
+    if (hasError) {
       // eslint-disable-next-line no-console
-      console.error("Error updating article sort order", res1.error || res2.error);
+      console.error("Error updating article sort orders", results.filter(r => r.error));
     }
   };
 
   const moveSection = async (id: string, direction: "up" | "down") => {
-    let newSectionSortOrder: number | undefined;
-    let newSwapSectionSortOrder: number | undefined;
-    let swapSectionId: string | undefined;
+    let updates: { id: string; sortOrder: number }[] = [];
 
     setSections(prev => {
       const section = prev.find(s => s.id === id);
       if (!section) return prev;
+      
       const siblings = prev
         .filter(s => s.parentId === section.parentId)
         .sort((a, b) => a.sortOrder - b.sortOrder);
+      
       const idx = siblings.findIndex(s => s.id === id);
       if ((direction === "up" && idx === 0) || (direction === "down" && idx === siblings.length - 1)) return prev;
+      
       const swapIdx = direction === "up" ? idx - 1 : idx + 1;
-      const swapSection = siblings[swapIdx];
+      
+      const newSiblings = [...siblings];
+      [newSiblings[idx], newSiblings[swapIdx]] = [newSiblings[swapIdx], newSiblings[idx]];
+      
+      newSiblings.forEach((s, index) => {
+        s.sortOrder = index;
+      });
 
-      swapSectionId = swapSection.id;
-      newSectionSortOrder = swapSection.sortOrder;
-      newSwapSectionSortOrder = section.sortOrder;
+      updates = newSiblings.map(s => ({ id: s.id, sortOrder: s.sortOrder }));
 
       return prev.map(s => {
-        if (s.id === id) return { ...s, sortOrder: newSectionSortOrder! };
-        if (s.id === swapSection.id) return { ...s, sortOrder: newSwapSectionSortOrder! };
-        return s;
+        const updated = updates.find(u => u.id === s.id);
+        return updated ? { ...s, sortOrder: updated.sortOrder } : s;
       });
     });
 
-    if (!swapSectionId || newSectionSortOrder === undefined || newSwapSectionSortOrder === undefined) return;
+    if (updates.length === 0) return;
 
-    const [res1, res2] = await Promise.all([
-      supabase.from("help_sections").update({ sort_order: newSectionSortOrder }).eq("id", id),
-      supabase.from("help_sections").update({ sort_order: newSwapSectionSortOrder }).eq("id", swapSectionId),
-    ]);
+    const promises = updates.map(u => 
+      supabase.from("help_sections").update({ sort_order: u.sortOrder }).eq("id", u.id)
+    );
 
-    if (res1.error || res2.error) {
+    const results = await Promise.all(promises);
+    const hasError = results.some(r => r.error);
+    if (hasError) {
       // eslint-disable-next-line no-console
-      console.error("Error updating section sort order", res1.error || res2.error);
+      console.error("Error updating section sort orders", results.filter(r => r.error));
     }
   };
 
