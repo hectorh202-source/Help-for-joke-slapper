@@ -86,6 +86,38 @@ const AdminHelp = () => {
     setIsAdmin(false);
   };
 
+  const orderedArticles = useMemo(() => {
+    const ordered: typeof articles = [];
+    
+    const introSection = sections.find(s => s.slug === "introduction");
+    if (introSection) {
+      ordered.push(...articles.filter(a => a.sectionId === introSection.id).sort((a, b) => a.sortOrder - b.sortOrder));
+    } else {
+      const introArticle = articles.find(a => a.slug === "what-is-joke-slapper");
+      if (introArticle) ordered.push(introArticle);
+    }
+
+    const traverse = (sectionsToTraverse: typeof sections) => {
+      for (const section of sectionsToTraverse) {
+        if (section.slug === "introduction") continue;
+
+        const children = sections.filter(s => s.parentId === section.id).sort((a, b) => a.sortOrder - b.sortOrder);
+        traverse(children);
+
+        const sectionArticles = articles.filter(a => a.sectionId === section.id).sort((a, b) => a.sortOrder - b.sortOrder);
+        ordered.push(...sectionArticles);
+      }
+    };
+
+    const topLevel = sections.filter(s => !s.parentId).sort((a, b) => a.sortOrder - b.sortOrder);
+    traverse(topLevel);
+
+    const orderedIds = new Set(ordered.map(a => a.id));
+    const orphans = articles.filter(a => !orderedIds.has(a.id)).sort((a, b) => a.sortOrder - b.sortOrder);
+
+    return Array.from(new Set([...ordered, ...orphans]));
+  }, [sections, articles]);
+
   if (isLoading) {
     return <div className="min-h-screen bg-background flex items-center justify-center"><p className="text-muted-foreground animate-pulse">Loading...</p></div>;
   }
@@ -166,37 +198,7 @@ const AdminHelp = () => {
     });
   };
 
-  const orderedArticles = useMemo(() => {
-    const ordered: typeof articles = [];
-    
-    const introSection = sections.find(s => s.slug === "introduction");
-    if (introSection) {
-      ordered.push(...articles.filter(a => a.sectionId === introSection.id).sort((a, b) => a.sortOrder - b.sortOrder));
-    } else {
-      const introArticle = articles.find(a => a.slug === "what-is-joke-slapper");
-      if (introArticle) ordered.push(introArticle);
-    }
 
-    const traverse = (sectionsToTraverse: typeof sections) => {
-      for (const section of sectionsToTraverse) {
-        if (section.slug === "introduction") continue;
-
-        const children = sections.filter(s => s.parentId === section.id).sort((a, b) => a.sortOrder - b.sortOrder);
-        traverse(children);
-
-        const sectionArticles = articles.filter(a => a.sectionId === section.id).sort((a, b) => a.sortOrder - b.sortOrder);
-        ordered.push(...sectionArticles);
-      }
-    };
-
-    const topLevel = sections.filter(s => !s.parentId).sort((a, b) => a.sortOrder - b.sortOrder);
-    traverse(topLevel);
-
-    const orderedIds = new Set(ordered.map(a => a.id));
-    const orphans = articles.filter(a => !orderedIds.has(a.id)).sort((a, b) => a.sortOrder - b.sortOrder);
-
-    return Array.from(new Set([...ordered, ...orphans]));
-  }, [sections, articles]);
 
   const filteredArticles = orderedArticles.filter(a => {
     const matchesSearch = a.title.toLowerCase().includes(search.toLowerCase());
