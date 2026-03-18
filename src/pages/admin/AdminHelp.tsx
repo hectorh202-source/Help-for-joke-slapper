@@ -277,7 +277,9 @@ const AdminHelp = () => {
   };
 
   const moveArticle = async (id: string, direction: "up" | "down") => {
-    let updated: HelpArticle[] | null = null;
+    let newArticleSortOrder: number | undefined;
+    let newSwapArticleSortOrder: number | undefined;
+    let swapArticleId: string | undefined;
 
     setArticles(prev => {
       const article = prev.find(a => a.id === id);
@@ -289,28 +291,23 @@ const AdminHelp = () => {
       if ((direction === "up" && idx === 0) || (direction === "down" && idx === siblings.length - 1)) return prev;
       const swapIdx = direction === "up" ? idx - 1 : idx + 1;
       const swapArticle = siblings[swapIdx];
-      const next = prev.map(a => {
-        if (a.id === id) return { ...a, sortOrder: swapArticle.sortOrder };
-        if (a.id === swapArticle.id) return { ...a, sortOrder: article.sortOrder };
+      
+      swapArticleId = swapArticle.id;
+      newArticleSortOrder = swapArticle.sortOrder;
+      newSwapArticleSortOrder = article.sortOrder;
+
+      return prev.map(a => {
+        if (a.id === id) return { ...a, sortOrder: newArticleSortOrder! };
+        if (a.id === swapArticle.id) return { ...a, sortOrder: newSwapArticleSortOrder! };
         return a;
       });
-      updated = next;
-      return next;
     });
 
-    if (!updated) return;
-    const current = updated.find(a => a.id === id);
-    const swap = updated.find(
-      a =>
-        a.sectionId === current?.sectionId &&
-        a.id !== current.id &&
-        a.sortOrder === (direction === "up" ? (current?.sortOrder ?? 0) + 1 : (current?.sortOrder ?? 0) - 1),
-    );
-    if (!current || !swap) return;
+    if (!swapArticleId || newArticleSortOrder === undefined || newSwapArticleSortOrder === undefined) return;
 
     const [res1, res2] = await Promise.all([
-      supabase.from("help_articles").update({ sort_order: current.sortOrder }).eq("id", current.id),
-      supabase.from("help_articles").update({ sort_order: swap.sortOrder }).eq("id", swap.id),
+      supabase.from("help_articles").update({ sort_order: newArticleSortOrder }).eq("id", id),
+      supabase.from("help_articles").update({ sort_order: newSwapArticleSortOrder }).eq("id", swapArticleId),
     ]);
 
     if (res1.error || res2.error) {
@@ -320,7 +317,9 @@ const AdminHelp = () => {
   };
 
   const moveSection = async (id: string, direction: "up" | "down") => {
-    let updated: HelpSection[] | null = null;
+    let newSectionSortOrder: number | undefined;
+    let newSwapSectionSortOrder: number | undefined;
+    let swapSectionId: string | undefined;
 
     setSections(prev => {
       const section = prev.find(s => s.id === id);
@@ -332,28 +331,23 @@ const AdminHelp = () => {
       if ((direction === "up" && idx === 0) || (direction === "down" && idx === siblings.length - 1)) return prev;
       const swapIdx = direction === "up" ? idx - 1 : idx + 1;
       const swapSection = siblings[swapIdx];
-      const next = prev.map(s => {
-        if (s.id === id) return { ...s, sortOrder: swapSection.sortOrder };
-        if (s.id === swapSection.id) return { ...s, sortOrder: section.sortOrder };
+
+      swapSectionId = swapSection.id;
+      newSectionSortOrder = swapSection.sortOrder;
+      newSwapSectionSortOrder = section.sortOrder;
+
+      return prev.map(s => {
+        if (s.id === id) return { ...s, sortOrder: newSectionSortOrder! };
+        if (s.id === swapSection.id) return { ...s, sortOrder: newSwapSectionSortOrder! };
         return s;
       });
-      updated = next;
-      return next;
     });
 
-    if (!updated) return;
-    const current = updated.find(s => s.id === id);
-    const swap = updated.find(
-      s =>
-        s.parentId === current?.parentId &&
-        s.id !== current.id &&
-        s.sortOrder === (direction === "up" ? (current?.sortOrder ?? 0) + 1 : (current?.sortOrder ?? 0) - 1),
-    );
-    if (!current || !swap) return;
+    if (!swapSectionId || newSectionSortOrder === undefined || newSwapSectionSortOrder === undefined) return;
 
     const [res1, res2] = await Promise.all([
-      supabase.from("help_sections").update({ sort_order: current.sortOrder }).eq("id", current.id),
-      supabase.from("help_sections").update({ sort_order: swap.sortOrder }).eq("id", swap.id),
+      supabase.from("help_sections").update({ sort_order: newSectionSortOrder }).eq("id", id),
+      supabase.from("help_sections").update({ sort_order: newSwapSectionSortOrder }).eq("id", swapSectionId),
     ]);
 
     if (res1.error || res2.error) {
